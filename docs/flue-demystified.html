@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flue, Demystified — the harness, decoded</title>
+<meta name="description" content="An interactive field-guide to Flue: why 'harness' means three things, agent = model + harness, agents vs workflows, and what one prompt() really does — turn by turn." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0a0c10; --ink-2:#0e1118; --panel:#12161f; --panel-2:#161b26;
+    --bone:#ece6d8; --bone-dim:#b7b2a6; --muted:#7d8493;
+    --ember:#ff6a3d; --ember-soft:#ffb066; --ember-glow:rgba(255,106,61,.45);
+    --teal:#57e0c4; --teal-dim:#2c8c7c;
+    --line:rgba(236,230,216,.10); --line-2:rgba(236,230,216,.18);
+    --grid:rgba(120,140,170,.07);
+    --r:14px; --maxw:1100px;
+    --serif:"Instrument Serif",Georgia,serif;
+    --sans:"Spline Sans",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--bone);
+    font-family:var(--sans); font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  /* blueprint grid + grain atmosphere */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid) 1px,transparent 1px),
+      linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse 120% 90% at 50% 0%,#000 35%,transparent 88%);
+  }
+  body::after{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background:radial-gradient(900px 520px at 78% -8%,rgba(255,106,61,.16),transparent 60%),
+               radial-gradient(820px 560px at 10% 12%,rgba(87,224,196,.08),transparent 62%);
+  }
+  .wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 26px}
+  a{color:var(--ember-soft); text-decoration:none}
+  a:hover{text-decoration:underline; text-underline-offset:3px}
+  code,.mono{font-family:var(--mono)}
+  ::selection{background:var(--ember); color:#150a05}
+
+  /* ---- eyebrow / labels ---- */
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--ember); display:inline-flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:""; width:26px; height:1px; background:var(--ember); opacity:.7}
+
+  /* ---- top rail ---- */
+  .rail{
+    position:sticky; top:0; z-index:30; backdrop-filter:blur(9px);
+    background:linear-gradient(var(--ink),rgba(10,12,16,.72));
+    border-bottom:1px solid var(--line);
+  }
+  .rail .row{max-width:var(--maxw); margin:0 auto; padding:13px 26px; display:flex; align-items:center; gap:18px}
+  .brand{font-family:var(--mono); font-weight:700; letter-spacing:.04em; font-size:14px; color:var(--bone)}
+  .brand b{color:var(--ember)}
+  .rail nav{margin-left:auto; display:flex; gap:22px}
+  .rail nav a{font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:var(--muted); text-transform:uppercase}
+  .rail nav a:hover{color:var(--bone); text-decoration:none}
+  @media(max-width:760px){.rail nav{display:none}}
+
+  /* ---- hero ---- */
+  header.hero{padding:104px 0 70px; position:relative}
+  .hero h1{
+    font-family:var(--serif); font-weight:400; font-size:clamp(56px,10vw,128px);
+    line-height:.92; letter-spacing:-.01em; margin:22px 0 0;
+  }
+  .hero h1 .it{font-style:italic; color:var(--ember)}
+  .hero .lede{
+    margin:30px 0 0; max-width:680px; font-size:clamp(18px,2.3vw,22px); color:var(--bone-dim);
+  }
+  .hero .lede b{color:var(--bone); font-weight:600}
+  .answer{
+    margin-top:40px; padding:26px 28px; border:1px solid var(--line-2); border-radius:var(--r);
+    background:linear-gradient(180deg,var(--panel),var(--ink-2));
+    position:relative; max-width:760px;
+  }
+  .answer::before{
+    content:"THE ONE-SENTENCE ANSWER"; position:absolute; top:-9px; left:20px;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.28em; color:var(--ember);
+    background:var(--ink); padding:0 9px;
+  }
+  .answer p{margin:0; font-size:20px; line-height:1.5}
+  .answer .em{font-family:var(--serif); font-style:italic; font-size:25px; color:var(--ember-soft)}
+
+  /* word-morph chip in hero */
+  .morph{
+    display:inline-block; min-width:1ch; font-family:var(--mono); color:var(--teal);
+    border-bottom:2px solid var(--teal-dim);
+  }
+
+  /* ---- section scaffold ---- */
+  section{padding:78px 0; border-top:1px solid var(--line); position:relative}
+  .sec-head{display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; margin-bottom:8px}
+  .sec-head h2{
+    font-family:var(--serif); font-weight:400; font-size:clamp(34px,5.4vw,58px);
+    line-height:1; letter-spacing:-.01em; margin:14px 0 0;
+  }
+  .sec-sub{color:var(--bone-dim); max-width:680px; margin:16px 0 34px}
+  .num{font-family:var(--mono); color:var(--muted); font-size:13px; letter-spacing:.2em}
+
+  /* reveal on scroll */
+  .reveal{opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1; transform:none}
+
+  /* ---- the 3-layer decoder ---- */
+  .decoder{display:grid; grid-template-columns:1.05fr .95fr; gap:30px; align-items:start}
+  @media(max-width:840px){.decoder{grid-template-columns:1fr}}
+  .stack{display:flex; flex-direction:column; gap:12px}
+  .layer{
+    position:relative; border:1px solid var(--line-2); border-radius:var(--r);
+    background:var(--panel); padding:18px 20px 18px 58px; cursor:pointer;
+    transition:transform .35s cubic-bezier(.2,.7,.2,1), border-color .3s, background .3s, box-shadow .3s;
+  }
+  .layer .lid{
+    position:absolute; left:18px; top:18px; font-family:var(--mono); font-size:12px;
+    color:var(--ink); background:var(--bone-dim); width:24px; height:24px; border-radius:6px;
+    display:grid; place-items:center; font-weight:700; transition:background .3s,color .3s;
+  }
+  .layer h3{margin:0; font-family:var(--mono); font-size:15px; letter-spacing:.02em}
+  .layer p{margin:7px 0 0; font-size:14.5px; color:var(--bone-dim)}
+  .layer .where{font-family:var(--mono); font-size:12px; color:var(--teal); margin-top:6px; display:block}
+  .layer[data-on="1"]{border-color:var(--ember); background:linear-gradient(180deg,#1a1108,var(--panel)); box-shadow:0 0 0 1px var(--ember-glow),0 18px 50px -28px var(--ember-glow); transform:translateX(8px)}
+  .layer[data-on="1"] .lid{background:var(--ember); color:#150a05}
+  /* nesting indents */
+  .stack .layer:nth-child(2){margin-left:26px}
+  .stack .layer:nth-child(3){margin-left:52px}
+  .stack .layer:nth-child(4){margin-left:78px}
+  @media(max-width:840px){.stack .layer{margin-left:0 !important}}
+
+  .scope{
+    border:1px solid var(--line-2); border-radius:var(--r); background:var(--ink-2);
+    padding:24px; position:sticky; top:74px; min-height:300px;
+  }
+  .scope .tag{font-family:var(--mono); font-size:11px; letter-spacing:.24em; color:var(--ember); text-transform:uppercase}
+  .scope h4{font-family:var(--serif); font-style:italic; font-size:30px; font-weight:400; margin:10px 0 4px; line-height:1.05}
+  .scope .meta{font-family:var(--mono); font-size:12.5px; color:var(--teal); margin-bottom:14px}
+  .scope p{margin:0 0 12px; color:var(--bone-dim); font-size:15px}
+  .scope pre{margin:6px 0 0}
+  pre{
+    font-family:var(--mono); font-size:12.5px; line-height:1.6; color:var(--bone);
+    background:#070a0e; border:1px solid var(--line); border-radius:10px; padding:14px 15px; overflow:auto;
+  }
+  pre .c{color:var(--muted)} pre .k{color:var(--ember-soft)} pre .s{color:var(--teal)} pre .f{color:#ffd9a0}
+
+  /* ---- equation ---- */
+  .equation{
+    display:flex; align-items:center; justify-content:center; gap:clamp(12px,3vw,34px);
+    flex-wrap:wrap; padding:30px 0 8px; font-family:var(--serif);
+  }
+  .eq-term{text-align:center}
+  .eq-term .big{font-size:clamp(40px,7vw,84px); line-height:1; display:block}
+  .eq-term .cap{font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-top:8px; display:block}
+  .eq-op{font-size:clamp(38px,6vw,72px); color:var(--ember); line-height:1}
+  .eq-term.agent .big{color:var(--ember)} .eq-term.model .big{color:var(--bone)} .eq-term.harness .big{color:var(--teal)}
+  .bolts{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:30px}
+  .bolt{
+    border:1px solid var(--line-2); border-radius:999px; padding:10px 18px; background:var(--panel);
+    font-size:14px; display:flex; gap:9px; align-items:center; transition:transform .3s, border-color .3s, color .3s;
+  }
+  .bolt:hover{transform:translateY(-3px); border-color:var(--teal); color:#fff}
+  .bolt b{font-family:var(--mono); color:var(--teal); font-size:12.5px}
+
+  /* ---- versus ---- */
+  .versus{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  @media(max-width:720px){.versus{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line-2); border-radius:var(--r); background:var(--panel); padding:24px; position:relative; overflow:hidden}
+  .card::after{content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+    background:radial-gradient(420px 160px at 100% 0,var(--accent,transparent),transparent 70%)}
+  .card.agent{--accent:rgba(255,106,61,.16)} .card.flow{--accent:rgba(87,224,196,.14)}
+  .card .kind{font-family:var(--mono); font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--muted)}
+  .card h3{font-family:var(--serif); font-size:34px; font-weight:400; margin:6px 0 2px}
+  .card.agent h3{color:var(--ember-soft)} .card.flow h3{color:var(--teal)}
+  .card ul{margin:14px 0 0; padding:0; list-style:none}
+  .card li{padding:9px 0; border-top:1px dashed var(--line); font-size:14.5px; color:var(--bone-dim); display:flex; gap:10px}
+  .card li b{color:var(--bone); font-weight:600}
+  .card li::before{content:"▸"; color:var(--ember); font-family:var(--mono)}
+  .card.flow li::before{color:var(--teal)}
+
+  /* ---- prompt player (showpiece) ---- */
+  .player{border:1px solid var(--line-2); border-radius:18px; background:linear-gradient(180deg,var(--panel),var(--ink-2)); overflow:hidden}
+  .player .bar{display:flex; align-items:center; gap:14px; padding:14px 18px; border-bottom:1px solid var(--line); background:#0b0e14}
+  .dot{width:11px;height:11px;border-radius:50%;background:#2a2f3a}
+  .dot.r{background:#ff5f56}.dot.y{background:#ffbd2e}.dot.g{background:#27c93f}
+  .player .bar .title{font-family:var(--mono); font-size:12.5px; color:var(--muted); margin-left:6px}
+  .player .bar .live{margin-left:auto; font-family:var(--mono); font-size:11px; letter-spacing:.2em; color:var(--ember); text-transform:uppercase; display:flex; align-items:center; gap:8px}
+  .player .bar .live i{width:8px;height:8px;border-radius:50%;background:var(--ember); box-shadow:0 0 0 0 var(--ember-glow); animation:pulse 1.6s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 var(--ember-glow)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+  .player .body{display:grid; grid-template-columns:300px 1fr; min-height:430px}
+  @media(max-width:820px){.player .body{grid-template-columns:1fr}}
+  .steps{border-right:1px solid var(--line); padding:8px; background:#0b0e14}
+  @media(max-width:820px){.steps{border-right:none; border-bottom:1px solid var(--line); display:flex; overflow-x:auto}}
+  .step{padding:13px 14px; border-radius:10px; cursor:pointer; transition:background .25s; position:relative}
+  .step + .step{margin-top:2px}
+  .step .lab{font-family:var(--mono); font-size:11px; letter-spacing:.16em; color:var(--muted); text-transform:uppercase}
+  .step .nm{font-size:15px; margin-top:3px; color:var(--bone-dim)}
+  .step .ln{font-family:var(--mono); font-size:11px; color:var(--teal-dim); margin-top:2px}
+  .step[data-on] {background:linear-gradient(90deg,rgba(255,106,61,.14),transparent)}
+  .step[data-on] .nm{color:var(--bone)} .step[data-on] .lab{color:var(--ember)}
+  .step[data-done] .lab::after{content:" ✓"; color:var(--teal)}
+
+  .stage{padding:24px 26px; position:relative}
+  .stage .scene{display:none; animation:fade .45s ease}
+  .stage .scene.show{display:block}
+  @keyframes fade{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:none}}
+  .stage h4{font-family:var(--serif); font-style:italic; font-weight:400; font-size:28px; margin:0 0 4px}
+  .stage .desc{color:var(--bone-dim); font-size:15px; margin:0 0 16px; max-width:62ch}
+  .ev{font-family:var(--mono); font-size:12.5px; display:flex; flex-direction:column; gap:6px}
+  .ev .e{padding:8px 12px; border:1px solid var(--line); border-left:3px solid var(--teal-dim); border-radius:8px; background:#070a0e; color:var(--bone-dim); opacity:0; transform:translateX(-8px); animation:slidein .4s forwards}
+  .ev .e b{color:var(--teal)}
+  .ev .e.hot{border-left-color:var(--ember)} .ev .e.hot b{color:var(--ember-soft)}
+  @keyframes slidein{to{opacity:1; transform:none}}
+  .turnbadge{display:inline-block; font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ember); border:1px solid var(--ember); border-radius:999px; padding:3px 11px; margin-bottom:12px}
+
+  .controls{display:flex; align-items:center; gap:12px; padding:14px 18px; border-top:1px solid var(--line); background:#0b0e14}
+  .btn{font-family:var(--mono); font-size:13px; letter-spacing:.04em; border:1px solid var(--line-2); background:var(--panel-2); color:var(--bone); padding:10px 18px; border-radius:9px; cursor:pointer; transition:.2s}
+  .btn:hover{border-color:var(--ember); color:#fff}
+  .btn.primary{background:var(--ember); color:#160a05; border-color:var(--ember); font-weight:700}
+  .btn.primary:hover{background:var(--ember-soft)}
+  .progress{flex:1; height:4px; background:#1a1f2a; border-radius:99px; overflow:hidden}
+  .progress i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--ember),var(--ember-soft)); transition:width .4s}
+  .hint{font-family:var(--mono); font-size:11px; color:var(--muted)}
+
+  /* ---- callouts ---- */
+  .takeaways{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:26px}
+  @media(max-width:720px){.takeaways{grid-template-columns:1fr}}
+  .take{border:1px solid var(--line-2); border-radius:var(--r); padding:20px 22px; background:var(--panel)}
+  .take .t{font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--ember); margin-bottom:8px}
+  .take p{margin:0; font-size:15px; color:var(--bone-dim)}
+  .take b{color:var(--bone)}
+
+  /* ---- footer ---- */
+  footer{border-top:1px solid var(--line); padding:60px 0 90px; color:var(--muted)}
+  footer .grid{display:grid; grid-template-columns:1.3fr 1fr; gap:30px}
+  @media(max-width:720px){footer .grid{grid-template-columns:1fr}}
+  footer h5{font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--bone-dim); margin:0 0 12px}
+  footer a{display:block; color:var(--bone-dim); font-size:14px; padding:4px 0; font-family:var(--mono)}
+  footer .big{font-family:var(--serif); font-style:italic; font-size:40px; color:var(--bone); line-height:1.05}
+  .src{font-family:var(--mono); font-size:12px; color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="row">
+    <span class="brand"><b>flue</b> / demystified</span>
+    <nav>
+      <a href="#overload">overload</a>
+      <a href="#equation">equation</a>
+      <a href="#versus">agents·flows</a>
+      <a href="#trace">prompt()</a>
+    </nav>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Field guide · The Agent Harness Framework</span>
+    <h1>It's a <span class="it">harness</span>.<br>The word just means<br><span class="morph" id="morph">three things</span>.</h1>
+    <p class="lede">Flue feels mysterious for one reason: <b>"harness" is overloaded across three layers</b>, and nothing tells you they're different. Untangle the word and the whole framework snaps into focus.</p>
+
+    <div class="answer">
+      <p><span class="em">Yes — Flue is a harness.</span> More precisely, a <b>framework for building agent harnesses</b>: "Astro/Next.js, but for agents." It supplies the harness half of <code>agent = model + harness</code>; the model-calling loop itself lives one layer deeper, in <code>pi-agent-core</code>, which Flue wraps.</p>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== 1. THE OVERLOAD ===================== -->
+<section id="overload">
+  <div class="wrap">
+    <span class="num">01 — THE SOURCE OF THE MYSTERY</span>
+    <div class="sec-head"><h2>“Harness” means three things</h2></div>
+    <p class="sec-sub">Click a layer to scope it. They are <b>nested, not competing</b> — a framework that hands you a handle, that opens sessions, that each run a loop.</p>
+
+    <div class="decoder reveal">
+      <div class="stack" id="stack">
+        <div class="layer" data-layer="3" data-on="1">
+          <span class="lid">3</span>
+          <h3>Flue, the framework</h3>
+          <p>“The Agent Harness Framework.” Supplies the harness half of agent = model + harness.</p>
+          <span class="where">the whole project</span>
+        </div>
+        <div class="layer" data-layer="2">
+          <span class="lid">2</span>
+          <h3>Flue's <code>Harness</code> object</h3>
+          <p>What <code>init(agent)</code> hands you: a programmable handle to sessions, fs, sandbox, tools.</p>
+          <span class="where">@flue/runtime · harness.ts</span>
+        </div>
+        <div class="layer" data-layer="1b">
+          <span class="lid">↳</span>
+          <h3>Session</h3>
+          <p>One conversation. Holds history, persistence, and constructs the loop on demand.</p>
+          <span class="where">runtime · session.ts</span>
+        </div>
+        <div class="layer" data-layer="1">
+          <span class="lid">1</span>
+          <h3>The LLM loop</h3>
+          <p>read → call a tool → observe → repeat. The literal agentic engine.</p>
+          <span class="where">pi-agent-core · Agent class</span>
+        </div>
+      </div>
+
+      <div class="scope" id="scope">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2. EQUATION ===================== -->
+<section id="equation">
+  <div class="wrap">
+    <span class="num">02 — THE MENTAL MODEL</span>
+    <div class="sec-head"><h2>agent = model + harness</h2></div>
+    <p class="sec-sub">A model alone is “a brain in a jar” — brilliant reasoning, no memory, no hands, no senses. The harness is everything you bolt on to fix that.</p>
+
+    <div class="equation reveal">
+      <div class="eq-term agent"><span class="big">agent</span><span class="cap">does work</span></div>
+      <span class="eq-op">=</span>
+      <div class="eq-term model"><span class="big">model</span><span class="cap">the brain</span></div>
+      <span class="eq-op">+</span>
+      <div class="eq-term harness"><span class="big">harness</span><span class="cap">body + senses</span></div>
+    </div>
+
+    <div class="bolts reveal">
+      <div class="bolt"><b>fs</b> keep its work</div>
+      <div class="bolt"><b>tools</b> act, not describe</div>
+      <div class="bolt"><b>sandbox</b> act safely</div>
+      <div class="bolt"><b>context</b> stay sharp</div>
+      <div class="bolt"><b>subagents</b> do many things</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3. AGENTS VS WORKFLOWS ===================== -->
+<section id="versus">
+  <div class="wrap">
+    <span class="num">03 — WHAT YOU ACTUALLY WRITE</span>
+    <div class="sec-head"><h2>Agents <span style="color:var(--muted);font-style:italic">vs</span> Workflows</h2></div>
+    <p class="sec-sub">Two top-level authoring surfaces that look alike and mean different things. The clearest tell: <b>runs belong to workflows only</b>.</p>
+
+    <div class="versus reveal">
+      <div class="card agent">
+        <span class="kind">agents/&lt;name&gt;.ts · default-exports createAgent()</span>
+        <h3>Agents</h3>
+        <ul>
+          <li><b>Addressable.</b> Reached by URL: <code>POST /agents/&lt;name&gt;/&lt;id&gt;</code></li>
+          <li><b>Persistent.</b> The <code>&lt;id&gt;</code> is a durable instance — reuse it to continue.</li>
+          <li><b>Runtime builds the harness</b> for you when a message arrives.</li>
+          <li><b>For conversations</b> — support threads, chat, long-lived sessions.</li>
+        </ul>
+      </div>
+      <div class="card flow">
+        <span class="kind">workflows/&lt;name&gt;.ts · exports run()</span>
+        <h3>Workflows</h3>
+        <ul>
+          <li><b>Bounded.</b> Clear input → finished result. A job, not a chat.</li>
+          <li><b>Inspectable.</b> Each invocation is a run with a <code>runId</code> (<code>/runs</code>, <code>flue logs</code>).</li>
+          <li><b>You call <code>init(agent)</code></b> to build the harness yourself.</li>
+          <li><b>For triggers</b> — CI jobs, one-shot scripts, batches.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 4. PROMPT() TURN BY TURN ===================== -->
+<section id="trace">
+  <div class="wrap">
+    <span class="num">04 — THE SHOWPIECE</span>
+    <div class="sec-head"><h2>One <span style="font-family:var(--mono);font-size:.7em;color:var(--ember)">prompt()</span>, turn by turn</h2></div>
+    <p class="sec-sub">The layering, in motion. Hit <b>Run</b> to watch a single <code>prompt()</code> Operation drive the engine through its Turns — and see where Flue's loop ends and pi-agent-core's begins.</p>
+
+    <div class="player reveal">
+      <div class="bar">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="title">session.prompt("Triage this issue.")</span>
+        <span class="live"><i></i> tracing</span>
+      </div>
+      <div class="body">
+        <div class="steps" id="steps"><!-- filled by JS --></div>
+        <div class="stage" id="stage"><!-- filled by JS --></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="run">▶ Run</button>
+        <button class="btn" id="stepBtn">Step ›</button>
+        <button class="btn" id="reset">Reset</button>
+        <div class="progress"><i id="pbar"></i></div>
+        <span class="hint" id="hint">Operation = your call · Turn = one LLM round-trip</span>
+      </div>
+    </div>
+
+    <div class="takeaways reveal">
+      <div class="take">
+        <div class="t">Insight 01</div>
+        <p><b>Structured output is forced tool-calling, not JSON mode.</b> A <code>result:</code> schema becomes the parameters of a synthetic <code>finish</code> tool, plus a retry loop that nudges the model until it calls it.</p>
+      </div>
+      <div class="take">
+        <div class="t">Insight 02</div>
+        <p><b>Flue's loop ≠ the agent loop.</b> <code>runModelTurnWithRecovery</code> is a thin recovery/persistence wrapper; the real read-act-observe cycle is pi-agent-core's. This trace <i>is</i> the layer-1 / layer-2 boundary, shown in motion.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="grid">
+      <div>
+        <h5>The takeaway</h5>
+        <p class="big">Flue is to an agent harness what Next.js is to a web server — it never reinvents the loop, it builds everything around it.</p>
+      </div>
+      <div>
+        <h5>Read next (in the repo)</h5>
+        <a href="../README.md">README.md — worked examples</a>
+        <a href="../AGENTS.md">AGENTS.md — terminology table</a>
+        <a href="../apps/docs/src/content/docs/concepts/agents.mdx">concepts/agents.mdx</a>
+        <a href="../packages/runtime/src/session.ts">runtime/session.ts — where layers 1 &amp; 2 meet (:679)</a>
+        <a href="./FLUE-DEMYSTIFIED.md">FLUE-DEMYSTIFIED.md — the full write-up</a>
+      </div>
+    </div>
+    <p class="src" style="margin-top:34px">Generated from FLUE-DEMYSTIFIED.md · all <code>file:line</code> anchors point to packages/runtime/src/session.ts</p>
+  </div>
+</footer>
+
+<script>
+/* ----------------------------------------------------------------
+   1. Hero word-morph: the overloaded word, cycling its three jobs
+----------------------------------------------------------------- */
+(function(){
+  const el = document.getElementById('morph');
+  const words = ['three things','an LLM loop','a runtime handle','a whole framework'];
+  let i = 0;
+  setInterval(()=>{
+    i = (i+1)%words.length;
+    el.style.opacity = 0;
+    setTimeout(()=>{ el.textContent = words[i]; el.style.opacity = 1; }, 220);
+  }, 2100);
+  el.style.transition = 'opacity .22s ease';
+})();
+
+/* ----------------------------------------------------------------
+   2. Layer decoder — click to scope; shows definition + the code
+----------------------------------------------------------------- */
+(function(){
+  const SCOPES = {
+    '3':{tag:'Layer 3 · the product',h:'Flue, the framework',meta:'the whole project',
+      p:['“The Agent Harness Framework.” It supplies every piece of the harness — sessions, tools, skills, fs, sandbox, persistence — and <i>none</i> of the model.','You bring the model by name; Flue brings everything around it.'],
+      code:'<span class="c">// you bring the model — Flue brings the harness</span>\nmodel: <span class="s">\'anthropic/claude-sonnet-4-6\'</span>'},
+    '2':{tag:'Layer 2 · the API object',h:'Flue\'s Harness',meta:'@flue/runtime · returned by init(agent)',
+      p:['The thing literally <i>called</i> a harness in the public API. It\'s a <b>handle</b>, not the loop — it holds sessions, a sandbox and a filesystem, and creates loops on demand.'],
+      code:'<span class="k">const</span> harness = <span class="k">await</span> <span class="f">init</span>(agent);\n<span class="k">const</span> session = <span class="k">await</span> harness.<span class="f">session</span>();'},
+    '1b':{tag:'Between 2 and 1',h:'Session',meta:'runtime · session.ts',
+      p:['One conversation inside a harness. It persists message history and, when you prompt it, constructs the pi-agent-core engine and drives it.'],
+      code:'<span class="k">const</span> { text } = <span class="k">await</span> session.<span class="f">prompt</span>(<span class="s">\'Triage this.\'</span>);'},
+    '1':{tag:'Layer 1 · the engine',h:'The LLM loop',meta:'pi-agent-core · Agent class',
+      p:['The part most people <i>mean</i> by “harness”: read → call a tool → observe → repeat. It is one layer below Flue. Flue wraps it completely.','Inside Session, Flue even stores it in a field it <i>also</i> calls <code>harness</code>:'],
+      code:'<span class="c">// session.ts:679</span>\n<span class="k">this</span>.harness = <span class="k">new</span> <span class="f">Agent</span>({ … });\n<span class="c">// Agent ← @earendil-works/pi-agent-core</span>'}
+  };
+  const scope = document.getElementById('scope');
+  const layers = [...document.querySelectorAll('.layer')];
+  function render(key){
+    const s = SCOPES[key];
+    scope.innerHTML =
+      '<div class="tag">'+s.tag+'</div>'+
+      '<h4>'+s.h+'</h4>'+
+      '<div class="meta">'+s.meta+'</div>'+
+      s.p.map(x=>'<p>'+x+'</p>').join('')+
+      '<pre>'+s.code+'</pre>';
+  }
+  function select(key){
+    layers.forEach(l=> l.removeAttribute('data-on'));
+    const target = layers.find(l=> l.dataset.layer===key);
+    if(target) target.setAttribute('data-on','1');
+    render(key);
+  }
+  layers.forEach(l=> l.addEventListener('click',()=> select(l.dataset.layer)));
+  layers.forEach(l=> l.addEventListener('mouseenter',()=> select(l.dataset.layer)));
+  render('3');
+})();
+
+/* ----------------------------------------------------------------
+   3. The prompt() trace player
+----------------------------------------------------------------- */
+(function(){
+  // Each step maps to the FLUE-DEMYSTIFIED deep-dive. `turn` flags an
+  // actual pi-agent-core LLM round-trip (layer 1); others are Flue (layer 2).
+  const STEPS = [
+    {lab:'A · setup',  nm:'prompt() → runOperation', ln:'session.ts:839 · :1486',
+      h:'Take the lock, wrap the call', layer:'flue',
+      desc:'createCallHandle wires your signal/abort. runOperation takes the session\'s exclusive lock — only one prompt/skill/task/shell at a time — then withCallOverrides assembles the per-call toolset and model.',
+      ev:[['flue','operation','lock acquired · source = "prompt"'],['flue','tools','[read, glob, grep, bash, task] + your defineTool tools'],['flue','model','resolved → anthropic/claude-sonnet-4-6']]},
+    {lab:'B · loop',   nm:'runModelTurnWithRecovery', ln:'session.ts:1666',
+      h:'The recovery wrapper — not the agent loop', layer:'flue',
+      desc:'Flue\'s own while-loop. It does NOT do the read→tool→observe iteration. It only kicks the engine, waits for idle, persists, and handles overflow→compaction and transient-error backoff.',
+      ev:[['flue','start()','→ harness.prompt(text) · kicks pi-agent-core'],['flue','await','harness.waitForIdle()']]},
+    {lab:'C · turn 1', nm:'streamSimple → provider', ln:'session.ts:612 · :690',
+      h:'Turn 1 — the literal model call', layer:'turn',
+      desc:'emitTurnRequestAndStream fires turn_request with the full input, then streamSimple() makes the real provider HTTP streaming call. The model replies with tool calls.',
+      ev:[['hot','turn_request','model · systemPrompt · messages · tools'],['hot','text_delta','"I\'ll read the issue first…"'],['hot','tool_call','bash → gh issue view 4821']]},
+    {lab:'C · tools',  nm:'parallel tool execution', ln:'session.ts:690 · :729',
+      h:'Tools run in the sandbox', layer:'turn',
+      desc:'toolExecution:"parallel" — each tool\'s execute() runs against the sandbox env. bash hits env.exec. Results are appended to the message list and fed back.',
+      ev:[['hot','tool_execution_start','bash · grep · read (parallel)'],['flue','sandbox','env.exec → stdout captured'],['hot','tool_result','3 results → back into context']]},
+    {lab:'C · turn N', nm:'loop until no tool calls', ln:'pi-agent-core',
+      h:'Turn 2…N — until the model stops calling tools', layer:'turn',
+      desc:'The engine loops: feed results → another Turn → another streamSimple call → until the assistant emits a final message with NO tool calls. Then it goes idle. One Operation, many Turns.',
+      ev:[['hot','turn_request','(turn 2) results in context'],['hot','text_delta','"Severity looks high — auth regression."'],['flue','idle','no more tool calls → waitForIdle resolves']]},
+    {lab:'D · persist',nm:'syncMessages → save', ln:'session.ts:1632 · :1639',
+      h:'Persist once per idle cycle', layer:'flue',
+      desc:'syncHarnessMessagesSince slices the new messages, appends to SessionHistory, and save() writes to the SessionStore — in-memory on Node, Durable Object storage on Cloudflare. Not per Turn — per idle cycle.',
+      ev:[['flue','history','appendMessages(source="prompt")'],['flue','store','save() → SessionStore']]},
+    {lab:'D · return', nm:'{ text, usage, model }', ln:'session.ts:2136',
+      h:'Return to your code', layer:'flue',
+      desc:'No-schema path returns { text, usage, model }. With a result: schema, runWithResultTools loops until the model calls finish (validated data) or give_up (typed error) — up to MAX_FOLLOWUPS = 32.',
+      ev:[['flue','return','{ text, usage, model }'],['flue','finally','per-call tool/model overrides restored']]}
+  ];
+
+  const stepsEl = document.getElementById('steps');
+  const stageEl = document.getElementById('stage');
+  const pbar = document.getElementById('pbar');
+  const hint = document.getElementById('hint');
+  let cur = -1, playing = false, timer = null;
+
+  // build step list
+  STEPS.forEach((s,idx)=>{
+    const d = document.createElement('div');
+    d.className='step'; d.dataset.idx=idx;
+    d.innerHTML = '<div class="lab">'+s.lab+'</div><div class="nm">'+s.nm+'</div><div class="ln">'+s.ln+'</div>';
+    d.addEventListener('click',()=>{ stop(); show(idx); });
+    stepsEl.appendChild(d);
+  });
+
+  function show(idx){
+    cur = idx;
+    const s = STEPS[idx];
+    [...stepsEl.children].forEach((c,i)=>{
+      c.toggleAttribute('data-on', i===idx);
+      c.toggleAttribute('data-done', i<idx);
+    });
+    const badge = s.layer==='turn'
+      ? '<span class="turnbadge">⟳ pi-agent-core · a Turn</span>'
+      : '<span class="turnbadge" style="color:var(--teal);border-color:var(--teal)">flue · layer 2</span>';
+    stageEl.innerHTML =
+      '<div class="scene show">'+badge+
+      '<h4>'+s.h+'</h4>'+
+      '<p class="desc">'+s.desc+'</p>'+
+      '<div class="ev">'+ s.ev.map((e,k)=>{
+        const cls = e[0]==='hot' ? 'e hot' : 'e';
+        return '<div class="'+cls+'" style="animation-delay:'+(k*0.12)+'s"><b>'+e[1]+'</b> &nbsp;'+e[2]+'</div>';
+      }).join('') +'</div></div>';
+    pbar.style.width = ((idx+1)/STEPS.length*100)+'%';
+    hint.textContent = s.layer==='turn'
+      ? 'You are inside pi-agent-core — this is a Turn (layer 1)'
+      : 'This is Flue (layer 2) — orchestration, not the model loop';
+  }
+
+  function next(){
+    if(cur < STEPS.length-1){ show(cur+1); }
+    else { stop(); }
+  }
+  function play(){
+    if(playing){ stop(); return; }
+    if(cur >= STEPS.length-1) cur = -1;
+    playing = true; runBtn.textContent='❚❚ Pause';
+    const tick = ()=>{
+      if(cur < STEPS.length-1){ show(cur+1); timer=setTimeout(tick, 2050); }
+      else stop();
+    };
+    show(cur+1); timer=setTimeout(tick,2050);
+  }
+  function stop(){ playing=false; clearTimeout(timer); runBtn.textContent = (cur>=STEPS.length-1?'↻ Replay':'▶ Run'); }
+  function reset(){ stop(); cur=-1; [...stepsEl.children].forEach(c=>{c.removeAttribute('data-on');c.removeAttribute('data-done')}); pbar.style.width='0'; stageEl.innerHTML='<div class="scene show" style="display:grid;place-items:center;min-height:340px;color:var(--muted);font-family:var(--mono);font-size:13px;text-align:center">press <span style="color:var(--ember)">&nbsp;Run&nbsp;</span> to trace one prompt() · 7 steps · 4 of them Turns</div>'; }
+
+  const runBtn = document.getElementById('run');
+  runBtn.addEventListener('click', play);
+  document.getElementById('stepBtn').addEventListener('click', ()=>{ stop(); next(); });
+  document.getElementById('reset').addEventListener('click', reset);
+  reset();
+})();
+
+/* ----------------------------------------------------------------
+   4. Scroll reveals
+----------------------------------------------------------------- */
+(function(){
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.16});
+  document.querySelectorAll('.reveal').forEach(el=> io.observe(el));
+})();
+</script>
+</body>
+</html>

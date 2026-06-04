@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+
+@theme {
+	--font-heading: system-ui, -apple-system, sans-serif;
+}
+
+.animated-dash {
+	background-image: repeating-linear-gradient(
+		to bottom,
+		#93c5fd 0px,
+		#93c5fd 4px,
+		transparent 4px,
+		transparent 8px
+	);
+	animation: dash-flow 0.6s linear infinite;
+}
+
+@keyframes dash-flow {
+	0% {
+		background-position: 0 0;
+	}
+	100% {
+		background-position: 0 8px;
+	}
+}
+
+/* Floating blueprint square — entrance + subtle ambient float (scale = floating toward viewer) */
+.floating-square {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation:
+		square-enter 700ms cubic-bezier(0.22, 1, 0.36, 1) both,
+		square-float 5s ease-in-out 700ms infinite;
+}
+
+@keyframes square-enter {
+	0% {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes square-float {
+	0%,
+	100% {
+		transform: scale(0.97);
+	}
+	50% {
+		transform: scale(1.03);
+	}
+}
+
+/* Pattern layer card — colored drop shadow (per-card tint via CSS var --shadow-rgb).
+   Uses rgb(R G B / A) modern syntax — required for space-separated CSS variable channels. */
+.pattern-layer {
+	filter: drop-shadow(0 10px 15px rgb(var(--shadow-rgb, 15 23 42) / 0.05))
+		drop-shadow(0 4px 6px rgb(var(--shadow-rgb, 15 23 42) / 0.1))
+		drop-shadow(0 2px 3px rgb(var(--shadow-rgb, 15 23 42) / 0.15));
+}
+
+/* Floating squares color.
+   Sets `color: blue-500` on the wrapper so every `fill="currentColor"` /
+   `stroke="currentColor"` in the SVG subtree picks it up. */
+.floating-square-color {
+	color: #3b82f6; /* blue-500 */
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.floating-square {
+		animation: none;
+	}
+}

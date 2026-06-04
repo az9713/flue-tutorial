@@ -1,0 +1,16 @@
+{
+	"name": "hello-world",
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@flue/runtime": "workspace:*",
+		"@daytona/sdk": "*",
+		"agents": "*",
+		"hono": "^4.7.0",
+		"just-bash": "^3.0.1",
+		"valibot": "^1.0.0"
+	},
+	"devDependencies": {
+		"@flue/cli": "workspace:*"
+	}
+}

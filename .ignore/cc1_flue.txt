@@ -1,0 +1,2025 @@
+
+simon@Simon_laptop MINGW64 ~/Downloads/astro_flue_better_stack/flue-main
+$ claude-yolo --chrome --name flue
+╭─── Claude Code v2.1.161 ─────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│                 Welcome back Simon!                │ started                 │
+│                                                    │ Run /init to create a … │
+│                       ▐▛███▜▌                      │ ─────────────────────── │
+│                      ▝▜█████▛▘                     │ What's new              │
+╭─── Claude Code v2.1.161 ─────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│                 Welcome back Simon!                │ started                 │
+│                                                    │ Run /init to create a … │
+│                       ▐▛███▜▌                      │ ─────────────────────── │
+│                      ▝▜█████▛▘                     │ What's new              │
+│                        ▘▘ ▝▝                       │ `OTEL_RESOURCE_ATTRIBU… │
+│   Opus 4.8 (1M context) with hi… · Claude Max ·    │ `claude agents` rows n… │
+│   az9713@yahoo.com's Organization                  │ `/mcp` now collapses c… │
+│   ~\Downloads\astro_flue_better_stack\flue-main    │ /release-notes for more │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+ ‼ 6 setup issues: MCP · /doctor
+
+> /technical-docs-writer demystify flue. very mysterious what it does. is it a  harness itself ?
+
+● I'll start by auditing the flue codebase to understand what it actually is
+  before writing any documentation.
+
+● Bash(ls -la && echo "---ROOT FILES---" && git log --oneline -5 2>/dev/null ||
+      echo "not a git repo")
+  ⎿  total 12
+     drwxr-xr-x 1 simon 197609 0 Jun  3 07:11 .
+     drwxr-xr-x 1 simon 197609 0 Jun  3 07:15 ..
+     … +3 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+● There's a nested flue-main directory. Let me look inside it.
+
+● Bash(cd flue-main && ls -la)
+  ⎿  total 592
+     drwxr-xr-x 1 simon 197609      0 Jun  3 07:11 .
+     drwxr-xr-x 1 simon 197609      0 Jun  3 07:11 ..
+     … +25 lines (ctrl+o to expand)
+
+● The real project root is the nested flue-main. Let me read the key files to
+  understand what flue is.
+
+  Read 1 file (ctrl+o to expand)
+
+● The README is clear at a high level. The user's question — "is it a harness
+  itself?" — is exactly the conceptual knot to untangle. Let me explore the
+  actual code to document it authoritatively.
+
+  Read 1 file (ctrl+o to expand)
+
+● Bash(cd flue-main && echo "===PACKAGES===" && ls packages && echo "===APPS==="      && ls apps && echo "===EXAMPLES===" && ls examples && echo
+      "===CONNECTORS===" && ls co…)
+  ⎿  Error: Exit code 1
+     /usr/bin/bash: line 3: cd: flue-main: No such file or directory
+
+● The Bash working directory reset. Let me use absolute paths and continue
+  surveying.
+
+  Listed 1 directory (ctrl+o to expand)
+
+● The Bash CWD is the outer dir but paths resolved — good. Let me look at the
+  runtime package core (the harness) and check existing docs.
+
+  Listed 1 directory (ctrl+o to expand)
+
+● There's already a full Astro Starlight docs site under apps/docs. So the gap    isn't "no docs" — it's that the conceptual core is mysterious. The user's real
+  question is "is flue a harness itself?" Let me read the harness/agent/session
+  source and the existing philosophy docs so my answer is authoritative and
+  integrates with what exists.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now I understand the layering: pi-agent-core is the actual LLM loop; Flue's
+  Harness wraps it. Let me read the existing philosophy doc and session.ts to
+  make my answer precise and consistent with existing docs.
+
+  Read 2 files (ctrl+o to expand)
+
+● Let me read the canonical agents concept doc and the runtime's public exports
+  + session to be fully precise.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now let me confirm the public surface and the pi-agent-core relationship to
+  nail the layering precisely.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Let me confirm exactly how the session wraps pi-agent-core's Agent — that's
+  the heart of the "is it a harness itself?" answer.
+
+● Bash(grep -n "new Agent\|this.agent\|Agent(" packages/runtime/src/session.ts |      head -20 && echo "---" && sed -n '1,30p' packages/runtime/src/session.ts)   ⎿  661:               this.agentTools = options.agentTools ?? [];
+     675:               const tools = [...builtinTools,
+     ...this.createCustomTools(this.age
+     ntTools, builtinTools)];
+     … +32 lines (ctrl+o to expand)
+
+● I now have the complete picture. The smoking gun is session.ts:679 — inside
+  Flue's Session, it literally does this.harness = new Agent(...) from
+  pi-agent-core. So there are two senses of "harness" tangled together, which is  exactly why flue feels mysterious.
+
+  Before I commit to a doc structure, let me get a second opinion on scope —
+  there's already an extensive apps/docs site, so I want to avoid duplicating
+  it.
+
+● Advising using Opus 4.8
+  ⎿  √ Advisor has reviewed the conversation and will apply the feedback
+     (ctrl+o to expand)
+
+● The advisor confirmed the approach and added the key constraint: this is a
+  download for understanding, not flue's own docs site — so I shouldn't pollute
+  apps/docs, and a full doc tree would just duplicate the 60+ files already
+  there. I'll write one self-contained explainer at the outer wrapper directory
+  and answer in chat.
+
+  The spine is verified: the word "harness" is overloaded across three layers,
+  and that's the entire source of the mystery.
+
+● Write(~\Downloads\astro_flue_better_stack\flue-main\FLUE-DEMYSTIFIED.md)
+  ⎿  Wrote 273 lines to ..\FLUE-DEMYSTIFIED.md
+      2 # Flue, Demystified
+      3 > A standalone explainer written for someone reading the `flue-ma
+        in` download to
+        docs site (thatat it *is*. It does not replace the project's own
+      5 > lives under `flue-main/apps/docs/` and is excellent); it answer
+        s the one
+        is thing, and issite assumes you already understand: **what is th
+      7 > it a harness itself?**
+      8
+      9 ---
+     … +389 lines (ctrl+o to expand)
+
+● The file is written. Let me give you the answer directly.
+
+  Is flue a harness itself? — Yes, but the word is hiding three things
+
+  That's exactly why it feels mysterious: "harness" is used for three different
+  layers, and nothing tells you they're different.
+
+  1. The LLM loop — read → call a tool → observe → repeat. This is the actual
+  agentic engine, and it isn't even Flue's code: it's a dependency,
+  pi-agent-core. Flue wraps it. (You can watch the wrapping happen —
+  packages/runtime/src/session.ts:679 does this.harness = new Agent(...),
+  importing Agent from pi-agent-core.)
+  2. Flue's Harness object — the thing you get back from const harness = await
+  init(agent). It's a handle to sessions, filesystem, sandbox, and tools. Not
+  the loop — the programmable boundary around it.
+  3. Flue the framework — "The Agent Harness Framework." It supplies the harness
+  half of the equation agent = model + harness.
+
+  So the precise answer: Flue is a framework for building agent harnesses —
+  "Next.js, but for agents." Next.js doesn't reinvent HTTP; Flue doesn't
+  reinvent the LLM loop. It gives you everything around it (sessions, tools,
+  skills, filesystem, sandbox, persistence, build pipeline) so a model becomes
+  an autonomous agent you can deploy headlessly to Node, Cloudflare, or CI.
+
+  What it actually does, in one breath: you write agents (addressable,
+  persistent, reached by URL) and workflows (bounded jobs with run history) as
+  TypeScript + Markdown; flue build compiles them into a deployable server; at
+  runtime a model runs inside the harness with a sandbox (in-memory by default —
+  that's the "no container" headline) to do real work without a human in the
+  loop.
+
+  What I wrote — and what I deliberately didn't
+
+  I wrote a single self-contained explainer:
+
+  FLUE-DEMYSTIFIED.md (in the outer flue-main wrapper folder, next to the
+  project)
+
+  I did not generate a full docs/ tree, for two reasons:
+  - The project already ships an excellent 60+ file docs site at
+  flue-main/apps/docs/ — duplicating it would be doc debt, not doc relief.
+  - This is a download you're reading to understand flue, not flue's own repo
+  you're maintaining — so I kept the explainer standalone and left apps/docs
+  untouched.
+
+  The doc covers the three-way "harness" untangling, agent = model + harness,
+  Agents vs. Workflows (the other big source of confusion), the full
+  AgentInstance → Harness → Session → Operation → Turn hierarchy, the sandbox,
+  and the two-package architecture — each tied back to real files/lines so you
+  can verify any claim.
+
+  ✓ Created 1 file: FLUE-DEMYSTIFIED.md
+  ✓ Cross-links verified (all point to real files in the download)
+  ✓ No stubs
+  ✓ Existing apps/docs site left intact
+
+  Entry point: FLUE-DEMYSTIFIED.md → start at "The one-sentence answer"
+
+  Want me to go deeper on any single layer — e.g. trace exactly what one
+  session.prompt() call does turn-by-turn, or contrast Flue against a plain AI
+  SDK?
+
+✻ Cogitated for 26m 26s
+
+※ recap: You asked me to demystify what flue is and whether it's a harness. I
+  answered (it's a framework for building agent harnesses) and wrote
+  FLUE-DEMYSTIFIED.md. Next: tell me if you want a deeper dive on any layer.
+  (disable recaps in /config)
+
+> /remote-control                                                                 ⎿  Remote Control connecting…
+
+  /remote-control is active · Continue here, on your phone, or at
+  https://claude.ai/code/session_01UWbgo7THzjBPgCGXcbG1Xg
+
+> Can we say flu is a harness compiler?                                         
+● Honest answer: it's a useful half-truth — accurate about one real thing,
+  misleading as a whole-framework label. Let me separate the two.
+
+  Where "harness compiler" is genuinely right
+
+  There is a real compile step. flue build (in @flue/cli) runs a Vite build
+  graph that takes your authored sources — agents/*.ts, workflows/*.ts,
+  AGENTS.md, .agents/skills/* — and emits a deployable server artifact (./dist:
+  a single Node .mjs, or a Cloudflare Worker + Durable Objects). That step does
+  compiler-ish work: it validates your static skill imports, packages each
+  SKILL.md and its permitted supporting files, rejects files that look like
+  secrets, and bundles everything for a chosen --target. So "Flue compiles your
+  project" is a true sentence.
+
+  Where it misleads
+
+  The phrase mislabels the whole because the harness isn't what gets compiled,
+  and a harness isn't what comes out.
+
+  - The object of compilation is your project (agents + workflows + Markdown
+  context), not a harness.
+  - The output is a server, not a harness. The harness is constructed later, at
+  runtime, by init(agent) → Harness → Session. The compiler emits something that
+  manufactures harnesses on demand; it doesn't emit a harness.
+  - Most of Flue's value lives at runtime, not in the build: sessions, message
+  persistence (Durable Objects / in-memory), the sandbox, routing, the
+  pi-agent-core loop. "Compiler" quietly throws all of that away.
+
+  So the strict reading is: flue build compiles your agents into a
+  harness-serving server. Neither end of that is a harness — which is why
+  "harness compiler" doesn't quite land.
+
+  The sharper label
+
+  Flue is a harness framework with a compiler in it — exactly the Astro/Next.js
+  shape the README invokes. Nobody calls Next.js a "page compiler," even though
+  next build absolutely compiles pages into a server; the compiler is one part
+  of a framework that's mostly runtime. Same here.
+
+  If you want a one-liner that keeps the compiler insight without overclaiming:
+
+  ▎ Flue compiles declarative agent definitions (TypeScript config + Markdown
+  ▎ context) into a deployable server that constructs harnesses at runtime.
+
+  That credits the build step and names what actually comes out.
+
+  Want me to fold a short "Is it a compiler?" subsection into
+  FLUE-DEMYSTIFIED.md — right after the "Is Flue a harness itself?" section — so
+  the doc preempts this exact question?
+
+✻ Sautéed for 35s
+
+> yes. add a "Is it a compiler?" subsection into                                    FLUE-DEMYSTIFIED.md — right after the "Is Flue a harness itself?" section —   so                                                                                the doc preempts this exact question
+
+● I'll add that subsection right after the "Is Flue a harness itself?" section,
+  before "Where to go next."
+
+● Update(~\Downloads\astro_flue_better_stack\flue-main\FLUE-DEMYSTIFIED.md)
+  ⎿  Added 45 lines
+      260
+      261  ---
+      262
+      263 +## Is it a compiler, then?
+      264 +
+      265 +A natural follow-up, since `flue build` clearly *compiles* som
+          +ething. The honest
+      266 +answer: **"harness compiler" is a useful half-truth — right ab
+          +out one real step,
+      267 +misleading as a label for the whole.**
+      268 +
+      269 +**Where it's genuinely right.** There is a real compile step.
+          +`flue build` (in
+      270 +`@flue/cli`) runs a **Vite build graph** that takes your autho
+          +red sources —
+      271 +`agents/*.ts`, `workflows/*.ts`, `AGENTS.md`, `.agents/skills/
+          +*` — and emits a
+      272 +deployable artifact in `./dist` (a single Node `.mjs`, or a Cl
+          +oudflare Worker +
+      273 +Durable Objects). It does compiler-ish work along the way: val
+          +idating your static
+      274 +skill imports, packaging each `SKILL.md` and its permitted sup
+          +porting files,
+      275 +rejecting files that look like secrets, and bundling everythin
+          +g for the chosen
+      276 +`--target`. So "Flue compiles your project" is simply a true s
+          +entence.
+      277 +
+      278 +**Where it misleads.** The phrase mislabels the *whole* framew
+          +ork, because the
+      279 +harness is neither the input nor the output of that compile:
+      280 +
+      281 +- **The thing compiled** is your *project* (agents + workflows
+          + + Markdown
+      282 +  context) — not a harness.
+      283 +- **The thing emitted** is a *server* — not a harness. The har
+          +ness is built
+      284 +  later, at **runtime**, by `init(agent)` → `Harness` → `Sessi
+          +on`. The compiler
+      285 +  emits something that *manufactures* harnesses on demand; it
+          +never emits a
+      286 +  harness.
+      287 +- **Most of Flue's value lives at runtime**, not in the build:
+          + sessions, message
+      288 +  persistence, the sandbox, routing, the `pi-agent-core` loop.
+          + "Compiler" quietly
+      289 +  drops all of that.
+      290 +
+      291 +So the strict reading is: `flue build` compiles *your agents*
+          +into a
+      292 +*harness-serving server*. Neither end of that is a harness — w
+          +hich is why
+      293 +"harness compiler" doesn't quite land.
+      294 +
+      295 +**The sharper label.** Flue is a **harness framework with a co
+          +mpiler in it** —
+      296 +exactly the Astro/Next.js shape. Nobody calls Next.js a "page
+          +compiler," even
+      297 +though `next build` absolutely compiles pages into a server; t
+          +he compiler is one
+      298 +part of a framework that is mostly runtime. Same here. If you
+          +want a one-liner
+      299 +that keeps the compiler insight without overclaiming:
+      300 +
+      301 +> **Flue compiles declarative agent definitions (TypeScript co
+          +nfig + Markdown
+      302 +> context) into a deployable server that constructs harnesses
+          +at runtime.**
+      303 +
+      304 +That credits the build step *and* names what actually comes ou
+          +t.
+      305 +
+      306 +---
+      307 +
+      308  ## Where to go next (in this download)
+      309
+      310  The project's real docs are thorough — now that the vocabulary
+            is unlocked,
+
+● Added. The new "Is it a compiler, then?" subsection now sits directly between
+  "So, is Flue a harness itself? — the precise answer" and "Where to go next,"
+  so the doc flows:
+
+  ▎ is it a harness? → is it a compiler? → where to go next
+
+  It mirrors the chat answer in durable form — the genuinely-right part (flue
+  build's real Vite compile step), the misleading part (harness is neither input
+  nor output; it's a runtime construct), and the sharper "harness framework
+  with a compiler in it" label plus the one-line summary.
+
+  The doc structure is now:
+  - The one-sentence answer
+  - Why it feels mysterious: "harness" means three things
+  - agent = model + harness
+  - Agents vs. Workflows
+  - The full hierarchy
+  - The sandbox
+  - Two-package architecture
+  - Is Flue a harness itself?
+  - Is it a compiler, then? ← new
+  - Where to go next
+
+  No stubs, all cross-references still point to real files in the download.
+
+✻ Sautéed for 24s
+
+※ recap: We demystified what Flue is and wrote FLUE-DEMYSTIFIED.md explaining
+  it's a harness framework, then added an "Is it a compiler?" subsection. The
+  doc is complete; next action is yours, whether further edits or a new
+  question. (disable recaps in /config)
+
+> i flattened the nested folder structure. i added a docs/. i moved               FLUE-DEMYSTIFIED.md to docs/.  i do not see any other docs from the original    repo. did you say they already have extensive documentations ? where are they   ? trace what one session.prompt() does turn-by-turn
+
+● Let me find the current structure after your flattening, then locate the
+  original docs and trace session.prompt().
+
+● Bash(echo "===CWD===" && pwd && echo "===ROOT===" && ls && echo "===docs/==="
+      && ls docs 2>/dev/null && echo "===find apps/docs content===" && find .
+      -path '*content…)
+  ⎿  ===CWD===
+     C:/Users/simon/Downloads/astro_flue_better_stack/flue-main
+     ===ROOT===
+     … +46 lines (ctrl+o to expand)
+                                                                                ● Found it. They were never missing — they're the source content for the docs
+  website (flueframework.com), which is itself an Astro Starlight app nested      under apps/. That's why you didn't spot them: they're not loose Markdown at     the repo root, they're .md/.mdx content files inside a web app at
+  apps/docs/src/content/docs/.
+
+  Listed 1 directory (ctrl+o to expand)
+                                                                                ● Confirmed — the original docs are all there: 64 files under
+  apps/docs/src/content/docs/, in 10 sections (api, cli, concepts, config,
+  ecosystem, getting-started, guide, introduction, reference, sdk). It's an
+  Astro Starlight app (apps/docs/astro.config.mjs) — the source for
+  flueframework.com. That's why they looked invisible: they're website content
+  nested in a sub-app, not Markdown at the repo root. To read them as a site: cd  apps/docs && pnpm install && pnpm dev. Or just open the raw .md/.mdx files      directly.
+
+  Your new top-level docs/ (with FLUE-DEMYSTIFIED.md) sits alongside that,
+  untouched by it. Good.
+
+  Now let me trace session.prompt() turn-by-turn. Let me read the actual
+  implementation.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Let me read the core of the prompt → run → turn machinery.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now let me read runPromptCall and the turn-running internals — the heart of
+  the loop.
+
+  Read 1 file (ctrl+o to expand)
+
+● Let me read runPromptCall and the turn loop with recovery — the actual heart.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Now the turn loop itself and the stream/event emission. Let me read both.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now the stream function and the subscribe handler that drives per-turn events   and tool dispatch.
+
+  Read 1 file (ctrl+o to expand)
+
+● I have the full picture. Let me confirm the persistence step
+  (syncHarnessMessagesSince) to complete the trace.
+
+  Read 1 file (ctrl+o to expand)
+
+● Found everything. First, to close out your other question clearly:
+
+  Where the "extensive docs" are
+
+  They were never deleted — they're 64 files at apps/docs/src/content/docs/, the  content source for the docs website (flueframework.com), which is an Astro
+  Starlight app (apps/docs/astro.config.mjs). That's why they were invisible to
+  you: not loose Markdown at the root, but website content buried in a sub-app.
+  Ten sections: introduction/, concepts/, guide/, api/, cli/, sdk/, config/,
+  ecosystem/, getting-started/, reference/. Read them raw, or cd apps/docs &&
+  pnpm install && pnpm dev to render the site. Your new top-level
+  docs/FLUE-DEMYSTIFIED.md is separate and untouched.
+
+  ---
+  session.prompt(), turn-by-turn
+
+  The crucial thing to hold onto: "turn" means two nested things, and prompt()
+  lives in the outer one.
+
+  - Operation = your one session.prompt() call (Flue's code).
+  - Turn = one LLM round-trip (provider HTTP call) inside pi-agent-core. One
+  Operation drives 1…N Turns.
+
+  Here's the whole path, with file:line anchors in
+  packages/runtime/src/session.ts:
+
+  A. Setup (before any model call)
+
+  1. prompt(text, options) → createCallHandle(signal, …) wraps the work in an
+  abortable handle (:839). Your signal / .abort() plugs in here.
+  2. runOperation('prompt', …) (:1486) takes the session's exclusive lock — only
+  one prompt/skill/task/shell runs at a time per session — and wires abort to
+  harness.abort() (:1502).
+  3. buildPromptText(text, schema) (:843) — if you passed a result: schema, the
+  prompt is augmented to tell the model to return data via a finish tool.
+  4. runPromptCall(…) (:2085): if there's a schema, createResultTools(schema)
+  mints two synthetic tools — finish (success; params = your valibot schema) and
+  give_up (typed failure).
+  5. withCallOverrides(…) (:1258) snapshots harness state, then for this call
+  only resolves the model, thinking level, and assembles the toolset:
+  [...builtin (read/glob/grep/bash/task), ...your defineTool tools, ...result
+  tools] and assigns it to harness.state.tools. A finally restores the old state
+  afterward — that's why per-call overrides don't leak.
+
+  harness here is the pi-agent-core Agent (layer 1), stored at :679.
+
+  B. The turn loop — runModelTurnWithRecovery (:1666)
+
+  while (true):
+    beforeLength = harness.state.messages.length
+    await start()                  // → harness.prompt(text, images)  ← kicks
+  pi-agent-core
+    await harness.waitForIdle()    // engine runs ALL its internal Turns until
+  done
+    await syncHarnessMessagesSince(beforeLength, source)   // append to history
+  + persist
+    latest = last message
+    if not assistant            → return
+    if context overflow         → compact, then start = harness.continue();
+  retry
+    if retryable model error    → backoff, then start = harness.continue();
+  retry
+    else checkCompaction();       return
+
+  Note what this outer loop actually does: it is recovery only
+  (overflow→compaction, transient-error backoff). The normal read→tool→observe
+  iteration is not here — it happens inside harness.prompt()/waitForIdle(), in
+  pi-agent-core.
+
+  C. Inside one harness.prompt() → the Turns (observed via the subscribe handler
+  :695 and emitTurnRequestAndStream :612)
+
+  For each Turn the engine runs:
+  1. turn_start → Flue assigns an activeTurnId, emits turn_start (:700).
+  2. emitTurnRequestAndStream (the streamFn, :612) emits a turn_request event
+  carrying the full input (systemPrompt, messages, tools), then calls
+  streamSimple(model, context, options) — this is the literal provider HTTP
+  streaming call (pi-ai).
+  3. Streaming deltas come back as message_update → re-emitted as text_delta,
+  thinking_start/delta/end (:708).
+  4. If the assistant message contains tool calls, the engine (configured
+  toolExecution: 'parallel', :690) fires tool_execution_start and runs each
+  tool's execute(id, params, signal) — e.g. bash hits the sandbox via env.exec.
+  Results are appended to the message list.
+  5. The engine loops back to step 1 with tool results in context — another
+  Turn, another streamSimple call — until the model emits a final assistant
+  message with no tool calls. Then it goes idle and waitForIdle() resolves.
+
+  So a single prompt() that involves the model running three bash commands is
+  roughly 4 Turns (3 tool-calling round-trips + 1 final answer), all inside one
+  start().
+
+  D. Persistence & return
+
+  - After the engine idles, syncHarnessMessagesSince (:1632) slices the new
+  messages, appends them to SessionHistory, and calls save() (:1639) → writes to
+  the SessionStore (in-memory on Node by default; Durable Object storage on
+  Cloudflare). Persistence happens once per idle cycle, not per Turn.
+  - No-schema path: returns { text: getAssistantText(), usage:
+  aggregateUsageSince(beforeLeafId), model } (:2136).
+  - Schema path: runWithResultTools (:2156) inspects the outcome — finished →
+  returns validated data; gave_up → throws ResultUnavailableError; pending
+  (model replied but never called finish) → sends a nudge follow-up and loops,
+  up to MAX_FOLLOWUPS = 32 (:2165).
+
+  The two insights worth keeping
+
+  - Structured output is forced tool-calling, not JSON mode. Your result: schema
+  becomes the params of a synthetic finish tool, plus a retry loop that nudges
+  the model until it calls it.
+  - Flue's loop ≠ the agent loop. runModelTurnWithRecovery is a thin
+  recovery/persistence wrapper; the real read-act-observe cycle is
+  pi-agent-core's — exactly the layer-1/layer-2 split from FLUE-DEMYSTIFIED.md.
+  This trace is that boundary, in motion.
+
+  Want me to add this as a "Deep dive: one prompt(), turn-by-turn" section at
+  the end of docs/FLUE-DEMYSTIFIED.md (with the same file:line anchors), so it
+  lives alongside the conceptual explanation?
+
+✻ Cooked for 2m 57s
+
+※ recap: You wanted flue demystified; I wrote docs/FLUE-DEMYSTIFIED.md
+  explaining it's a harness framework, located the original 64 docs under
+  apps/docs, and traced session.prompt() turn-by-turn. Next: I can add that
+  trace as a section to the doc if you want. (disable recaps in /config)
+
+> add this as a "Deep dive: one prompt(), turn-by-turn" section at                  the end of docs/FLUE-DEMYSTIFIED.md . in the future, always write             non-trivial explanations to document artifacts and do not output the full       explanation to the terminal. in other words, flip the output surface: output    to markdown on disk not terminal for all non-trivial explanations. now please   do it for prompt(), turn by turn.
+
+● This is a clear, durable preference — I'll save it to memory, then append the
+  section to disk.
+
+  Listed 1 directory, wrote 2 memories (ctrl+o to expand)
+
+● Now the deep-dive section, appended to the end of the doc:
+
+● Update(docs\FLUE-DEMYSTIFIED.md)
+  ⎿  File must be read first
+
+● The file moved to the new path, so I need to read it first.
+
+  Read 1 file (ctrl+o to expand)
+
+● The content is intact at the new path. Now I can append the section.
+
+● Update(docs\FLUE-DEMYSTIFIED.md)
+  ⎿  Added 105 lines
+      316  - `flue-main/apps/docs/src/content/docs/concepts/agents.mdx` —
+            the canonical "what is an agent / what is a harness" deep div
+           e.
+      317  - `flue-main/apps/docs/src/content/docs/guide/` — per-piece gu
+           ides: workflows, sandboxes, tools, skills, subagents.
+      318  - `flue-main/packages/runtime/src/harness.ts` and `session.ts`
+            — read these two to *see* layers 2 and 1 meet (the `new Agent
+           (...)` line is `session.ts:679`).
+      319 +
+      320 +---
+      321 +
+      322 +## Deep dive: one `prompt()`, turn-by-turn
+      323 +
+      324 +This is the conceptual layering from earlier, *in motion*. It
+          +traces exactly what
+      325 +happens when you call `session.prompt(...)`, with `file:line`
+          +anchors into
+      326 +`packages/runtime/src/session.ts`.
+      327 +
+      328 +### Hold onto this: "turn" means two nested things
+      329 +
+      330 +- **Operation** — your one `session.prompt()` call. Flue's cod
+          +e.
+      331 +- **Turn** — one LLM round-trip (a provider HTTP call) inside
+          +`pi-agent-core`.
+      332 +
+      333 +**One Operation drives 1…N Turns.** A `prompt()` where the mod
+          +el runs three bash
+      334 +commands is ~4 Turns (3 tool-calling round-trips + 1 final ans
+          +wer), all inside a
+      335 +single Operation. The thing most people picture as "the agent
+          +loop" is the inner
+      336 +Turn loop, and it lives one layer below Flue, in `pi-agent-cor
+          +e`.
+      337 +
+      338 +### A. Setup — before any model call
+      339 +
+      340 +1. **`prompt(text, options)`** → `createCallHandle(signal, …)`
+          + wraps the work in
+      341 +   an abortable handle (`:839`). Your `signal` / `.abort()` pl
+          +ugs in here.
+      342 +2. **`runOperation('prompt', …)`** (`:1486`) takes the session
+          +'s **exclusive
+      343 +   lock** — only one prompt/skill/task/shell runs at a time pe
+          +r session — and
+      344 +   wires cancellation to `harness.abort()` (`:1502`).
+      345 +3. **`buildPromptText(text, schema)`** (`:843`) — if you passe
+          +d a `result:`
+      346 +   schema, the prompt is augmented to instruct the model to re
+          +turn data via a
+      347 +   `finish` tool.
+      348 +4. **`runPromptCall(…)`** (`:2085`): with a schema, `createRes
+          +ultTools(schema)`
+      349 +   mints two synthetic tools — **`finish`** (success; its para
+          +ms *are* your
+      350 +   valibot schema) and **`give_up`** (typed failure).
+      351 +5. **`withCallOverrides(…)`** (`:1258`) snapshots harness stat
+          +e, then for *this
+      352 +   call only* resolves the model + thinking level and assemble
+          +s the toolset:
+      353 +   `[...builtin (read/glob/grep/bash/task), ...your defineTool
+          + tools, ...result
+      354 +   tools]`, assigning it to `harness.state.tools`. A `finally`
+          + restores the prior
+      355 +   state afterward — which is why per-call overrides never lea
+          +k.
+      356 +
+      357 +Throughout, `harness` is the **pi-agent-core `Agent`** (layer
+          +1), constructed at
+      358 +`:679`.
+      359 +
+      360 +### B. The turn loop — `runModelTurnWithRecovery` (`:1666`)
+      361 +
+      362 +```text
+      363 +while (true):
+      364 +  beforeLength = harness.state.messages.length
+      365 +  await start()                  // → harness.prompt(text, ima
+          +ges)  ← kicks pi-agent-core
+      366 +  await harness.waitForIdle()    // engine runs ALL its intern
+          +al Turns until done
+      367 +  await syncHarnessMessagesSince(beforeLength, source)   // ap
+          +pend to history + persist
+      368 +  latest = last message
+      369 +  if not assistant            → return
+      370 +  if context overflow         → compact, then start = harness.
+          +continue(); retry
+      371 +  if retryable model error    → backoff, then start = harness.
+          +continue(); retry
+      372 +  else checkCompaction();       return
+      373 +```
+      374 +
+      375 +The key realization: this outer loop is **recovery only** — co
+          +ntext-overflow →
+      376 +compaction, and transient-error backoff. The *normal* read → t
+          +ool → observe
+      377 +iteration is **not here**. It happens *inside* `harness.prompt
+          +()` /
+      378 +`waitForIdle()`, down in pi-agent-core.
+      379 +
+      380 +### C. Inside one `harness.prompt()` — the Turns
+      381 +
+      382 +Observed via the subscribe handler (`:695`) and `emitTurnReque
+          +stAndStream`
+      383 +(`:612`). For each Turn the engine runs:
+      384 +
+      385 +1. `turn_start` → Flue assigns an `activeTurnId` and emits `tu
+          +rn_start` (`:700`).
+      386 +2. **`emitTurnRequestAndStream`** (the `streamFn`, `:612`) emi
+          +ts a `turn_request`
+      387 +   event carrying the *full* input (systemPrompt, messages, to
+          +ols), then calls
+      388 +   **`streamSimple(model, context, options)`** — **this is the
+          + literal provider
+      389 +   HTTP streaming call** (pi-ai).
+      390 +3. Streaming deltas arrive as `message_update`, re-emitted as
+          +`text_delta` and
+      391 +   `thinking_start/delta/end` (`:708`).
+      392 +4. If the assistant message contains **tool calls**, the engin
+          +e (configured
+      393 +   `toolExecution: 'parallel'`, `:690`) fires `tool_execution_
+          +start` and runs each
+      394 +   tool's `execute(id, params, signal)` — e.g. `bash` hits the
+          + sandbox via
+      395 +   `env.exec`. Results are appended to the message list.
+      396 +5. The engine **loops back to step 1** with tool results in co
+          +ntext — another
+      397 +   Turn, another `streamSimple` call — until the model emits a
+          + final assistant
+      398 +   message with **no tool calls**. Then it goes idle and `wait
+          +ForIdle()` resolves.
+      399 +
+      400 +### D. Persistence & return
+      401 +
+      402 +- After the engine idles, **`syncHarnessMessagesSince`** (`:16
+          +32`) slices the new
+      403 +  messages, appends them to `SessionHistory`, and calls **`sav
+          +e()`** (`:1639`),
+      404 +  writing to the `SessionStore` — in-memory on Node by default
+          +, Durable Object
+      405 +  storage on Cloudflare. **Persistence happens once per idle c
+          +ycle, not per
+      406 +  Turn.**
+      407 +- **No-schema path:** returns
+      408 +  `{ text: getAssistantText(), usage: aggregateUsageSince(befo
+          +reLeafId), model }`
+      409 +  (`:2136`).
+      410 +- **Schema path:** `runWithResultTools` (`:2156`) inspects the
+          + outcome —
+      411 +  `finished` → returns validated `data`; `gave_up` → throws
+      412 +  `ResultUnavailableError`; `pending` (model replied but never
+          + called `finish`) →
+      413 +  sends a nudge follow-up and loops, up to **`MAX_FOLLOWUPS =
+          +32`** (`:2165`).
+      414 +
+      415 +### Two insights worth keeping
+      416 +
+      417 +- **Structured output is forced tool-calling, not JSON mode.**
+          + Your `result:`
+      418 +  schema becomes the parameters of a synthetic `finish` tool,
+          +plus a retry loop
+      419 +  that nudges the model until it calls it.
+      420 +- **Flue's loop ≠ the agent loop.** `runModelTurnWithRecovery`
+          + is a thin
+      421 +  recovery/persistence wrapper; the real read-act-observe cycl
+          +e is
+      422 +  pi-agent-core's. This trace *is* the layer-1 / layer-2 bound
+          +ary from the top of
+      423 +  this document, shown in motion.
+
+● Done.
+
+  Added: "Deep dive: one prompt(), turn-by-turn" → docs/FLUE-DEMYSTIFIED.md (end  of file). Four-stage trace (Setup → recovery loop → inner Turns →
+  persistence/return) with session.ts line anchors, plus the two takeaways
+  (structured output = forced finish tool-calling; Flue's outer loop is
+  recovery-only, the real agent loop is pi-agent-core's).
+
+  Saved preference to memory: non-trivial explanations go to markdown on disk,
+  terminal gets only a pointer — applied starting now.
+
+✻ Sautéed for 1m 46s
+
+※ recap: You're documenting flue to demystify it; I've written
+  docs/FLUE-DEMYSTIFIED.md covering the harness layers, compiler question, and a  turn-by-turn prompt() trace. Next action is yours: review the doc or tell me
+  what to cover next.
+
+> create an interactive dynamic html to based on the FLUE-DEMYSTIFIED.md file.    use hyperframe to create a video.
+
+● I'll build the interactive HTML (clearly specified) and handle the video.
+  Building a production UI means I should pull in the frontend-design skill
+  first. The "hyperframe" video step I need to clarify — it's not a tool I        recognize in this environment, so I'll get that pinned down in parallel rather  than guess.
+
+● Skill(frontend-design:frontend-design)
+  ⎿  Successfully loaded skill
+
+● Before I build, one genuine blocker: "hyperframe" isn't a tool I have in this
+  environment — it's not among my available skills, MCP servers, or installed     CLIs. I don't want to guess what it is and build the wrong video pipeline. The  HTML I can start on immediately regardless; how it's structured                 (scene-by-scene vs. one scroll page) depends on your answer.
+──────────────────────────────────────────────────────────────────────────────── [ ] Video tool
+
+  than guess.
+
+● Skill(frontend-design:frontend-design)
+  ⎿  Successfully loaded skill
+
+● Before I build, one genuine blocker: "hyperframe" isn't a tool I have in this
+  environment — it's not among my available skills, MCP servers, or installed
+  CLIs. I don't want to guess what it is and build the wrong video pipeline. The
+  than guess.
+
+● Skill(frontend-design:frontend-design)
+  ⎿  Successfully loaded skill
+
+● Before I build, one genuine blocker: "hyperframe" isn't a tool I have in this
+  environment — it's not among my available skills, MCP servers, or installed
+  CLIs. I don't want to guess what it is and build the wrong video pipeline. The
+  HTML I can start on immediately regardless; how it's structured
+  (scene-by-scene vs. one scroll page) depends on your answer.
+
+● User declined to answer questions
+  ⎿  · What is "hyperframe" — how should I produce the video from the HTML?          (Capture the HTML to MP4 / It's a specific tool/package / Use Higgsfield
+     (AI video) / HTML only for now)
+
+> check /transcript-artifact-generator skill
+
+● Skill(transcript-artifact-generator)
+  ⎿  Successfully loaded skill
+
+● "HyperFrames" is a known artifact format in this skill (listed alongside
+  Remotion for narrated/animated videos). Let me look at how the skill actually   produces a HyperFrames video — there must be a generator or reference.        
+  Searched for 3 patterns, read 1 file (ctrl+o to expand)
+
+● Solved the mystery. HyperFrames is a real tool — "HyperFrames by HeyGen: Write
+  HTML, render video" (GSAP animations, captions, voiceovers, website-to-video
+  capture). It's in your plugin marketplace catalog (hyperframes, from
+  github.com/heygen-com/hyperframes). That's exactly the "write HTML → render
+  video" pipeline your request implies. Let me check whether it's actually        installed here.
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Bash(echo "===installed_plugins.json (hyperframe?)===" && grep -i "hyperframe"      "C:/Users/simon/.claude/plugins/installed_plugins.json" || echo "NOT in
+      installed_plug…)
+  ⎿  ===installed_plugins.json (hyperframe?)===
+     NOT in installed_plugins.json
+     … +81 lines (ctrl+o to expand)
+
+● Key finding: HyperFrames is catalogued but not installed (it's not in
+  installed_plugins.json). It's a HeyGen plugin sourced from GitHub that needs
+  installation + a render toolchain. So I can't invoke it as a skill right now.
+
+  Here's my plan, which doesn't stall on that: the interactive HTML is unblocked  and is also exactly what HyperFrames consumes (it does "website-to-video
+  capture"). I'll build the HTML now, and in parallel gather the real
+  HyperFrames workflow rather than guess at it. Let me read the full current
+  doc, check the local render toolchain, and load WebFetch.
+
+  Read 1 file (ctrl+o to expand)
+
+● Bash(echo "node:" && node --version 2>/dev/null || echo "NO node"; echo "npm:"      && npm --version 2>/dev/null || echo "NO npm"; echo "npx:" && npx
+      --version 2>/dev/nul…)
+  ⎿  node:
+     v22.22.0
+     npm:
+     … +8 lines (ctrl+o to expand)
+
+● Toolchain is fully present (node 22, npm, npx, ffmpeg, git) — so rendering is
+  feasible. Now let me learn the real HyperFrames workflow instead of guessing,
+  by fetching its repo.
+
+● Fetch(https://raw.githubusercontent.com/heygen-com/hyperframes/main/README.md)
+  ⎿  Received 11.7KB (200 OK)
+
+● Everything checks out — HyperFrames is npx hyperframes init → write an HTML
+  composition with data-start/data-duration timing + GSAP timelines on
+  window.__timelines → npx hyperframes render to MP4. Needs Node 22+ and FFmpeg,  both present. Fully local, no API key. So both deliverables are achievable
+  here.
+
+  ★ Insight ─────────────────────────────────────
+  HyperFrames inverts the usual video tool. Instead of a timeline GUI, the DOM
+  is the timeline: each element declares
+  data-start/data-duration/data-track-index, and a render engine seeks a
+  headless browser frame-by-frame, screenshotting each frame for FFmpeg to
+  stitch. That's why animations must be "seekable" — registered as paused GSAP
+  timelines on window.__timelines.<id> that the renderer scrubs
+  deterministically, not requestAnimationFrame loops (which aren't
+  frame-reproducible).
+  ─────────────────────────────────────────────────
+
+  Plan — two artifacts, both written to disk (per your standing preference):
+  1. docs/flue-demystified.html — a standalone, interactive single-file page
+  (the showpiece: an animated prompt() turn-by-turn player).
+  2. docs/video/ — a HyperFrames project that renders flue-demystified.mp4 from
+  the same content.
+
+  Let me build the interactive HTML first — it's the core deliverable and also
+  doubles as HyperFrames' capture input.
+
+● Write(docs\flue-demystified.html)
+  ⎿  Wrote 604 lines to docs\flue-demystified.html
+       2 <html lang="en">
+       4 <meta charset="UTF-8" />
+         =1.0" />me="viewport" content="width=device-width, initial-scale
+       6 <title>Flue, Demystified — the harness, decoded</title>
+         Flue: why 'harness' means three things, agent = model + harness,
+         y turn." />workflows, and what one prompt() really does — turn b
+       8 <link rel="preconnect" href="https://fonts.googleapis.com" />
+         gin />rel="preconnect" href="https://fonts.gstatic.com" crossori
+         Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Spl
+         ine+Sans:wght@400;500;600&displ
+     … +851 lines (ctrl+o to expand)
+
+● Interactive HTML is done — bold "engineering field-guide" aesthetic
+  (Instrument Serif + JetBrains Mono on near-black blueprint grid, ember/teal
+  heat palette fitting "flue"), with four interactive pieces: the hero
+  word-morph, the click-to-scope 3-layer decoder, the agent = model + harness
+  equation, and the showpiece prompt() trace player that animates all 7 steps
+  and flags which are pi-agent-core Turns vs Flue orchestration.
+
+  Now the HyperFrames video. Let me scaffold the project.
+
+● Bash(cd "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs" &&
+      npx -y hyperframes init video 2>&1 | head -60; echo "---EXIT $?---"; echo
+      "=== resulting…)
+  ⎿  Created video/
+       AGENTS.md
+       CLAUDE.md
+     … +35 lines (ctrl+o to expand)
+  ⎿  (timeout 4m)
+
+● The scaffold worked. Let me read the generated files to learn the exact
+  composition conventions this version expects before I author my own.
+
+● Bash(cd
+      "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs/video" &&      echo "===package.json===" && cat package.json && echo "" && echo
+      "===hyperframes.j…)
+  ⎿  ===package.json===
+     {
+       17        }
+       13 -      html,
+       14 -      body {
+       15 -        margin: 0;
+       16 -        width: 1920px;
+       17 -        height: 1080px;
+       18 -        overflow: hidden;
+       19 -        background: #000;
+       20 -      }
+       18 +      html,body{width:1920px;height:1080px;overflow:hidden;bac                 +kground:var(--ink);color:var(--bone);font-family:var(--sans)}
+       19 +      #root{position:relative;width:1920px;height:1080px}
+       20 +
+       21 +      /* ---- static atmosphere (always visible) ---- */
+       22 +      .bg-grid{position:absolute;inset:0;
+       23 +        background-image:linear-gradient(rgba(120,140,170,.08)
+          + 1px,transparent 1px),linear-gradient(90deg,rgba(120,140,170,.
+          +08) 1px,transparent 1px);
+       24 +        background-size:60px 60px;
+       25 +        -webkit-mask-image:radial-gradient(ellipse 110% 80% at
+          + 50% 42%,#000 45%,transparent 92%);
+       26 +                mask-image:radial-gradient(ellipse 110% 80% at
+          + 50% 42%,#000 45%,transparent 92%);}
+       27 +      .bg-glow{position:absolute;inset:0;
+       28 +        background:radial-gradient(900px 600px at 80% -6%,rgba
+          +(255,106,61,.18),transparent 60%),
+       29 +                   radial-gradient(820px 620px at 8% 8%,rgba(8
+          +7,224,196,.10),transparent 62%);}
+       30 +      .framemark{position:absolute;left:70px;top:60px;font-fam
+          +ily:var(--mono);font-size:22px;letter-spacing:.04em;color:var(
+          +--bone)}
+       31 +      .framemark b{color:var(--ember)}
+       32 +      .framemark .slash{color:var(--muted)}
+       33 +      .footmark{position:absolute;left:70px;bottom:58px;font-f
+          +amily:var(--mono);font-size:18px;letter-spacing:.22em;color:va
+          +r(--muted);text-transform:uppercase}
+       34 +      .pagemark{position:absolute;right:70px;bottom:58px;font-
+          +family:var(--mono);font-size:18px;letter-spacing:.22em;color:v
+          +ar(--muted)}
+       35 +
+       36 +      /* ---- scenes ---- */
+       37 +      .scene{position:absolute;inset:0;display:flex;flex-direc
+          +tion:column;justify-content:center;align-items:center;text-ali
+          +gn:center;padding:0 150px}
+       38 +      .eyebrow{font-family:var(--mono);font-size:24px;letter-s
+          +pacing:.4em;text-transform:uppercase;color:var(--ember);margin
+          +-bottom:34px}
+       39 +      .eyebrow.teal{color:var(--teal)}
+       40 +
+       41 +      /* S1 */
+       42 +      #s1-title{font-family:var(--serif);font-size:200px;line-
+          +height:.9;letter-spacing:-.01em}
+       43 +      #s1-title .it{font-style:italic;color:var(--ember)}
+       44 +      #s1-sub{font-family:var(--serif);font-style:italic;font-
+          +size:52px;color:var(--bone-dim);margin-top:30px}
+       45 +
+       46 +      /* S2 layers */
+       47 +      #s2 .cap{font-family:var(--serif);font-size:84px;margin-
+          +bottom:50px}
+       48 +      .lstack{display:flex;flex-direction:column;gap:20px;widt
+          +h:1180px}
+       49 +      .layer{position:relative;border:1px solid var(--line);bo
+          +rder-radius:18px;background:var(--panel);
+       50 +        padding:26px 34px;text-align:left;display:flex;align-i
+          +tems:center;gap:26px}
+       51 +      .layer .lid{font-family:var(--mono);font-weight:700;font
+          +-size:26px;width:54px;height:54px;border-radius:12px;
+       52 +        background:var(--bone-dim);color:var(--ink);display:gr
+          +id;place-items:center;flex:none}
+       53 +      .layer .lt{font-family:var(--mono);font-size:30px;color:
+          +var(--bone)}
+       54 +      .layer .lw{font-family:var(--mono);font-size:22px;color:
+          +var(--teal);margin-left:auto}
+       55 +      .layer.hot{border-color:var(--ember);background:linear-g
+          +radient(180deg,#1a1108,var(--panel));box-shadow:0 0 0 1px rgba
+          +(255,106,61,.4),0 30px 70px -40px rgba(255,106,61,.6)}
+       56 +      .layer.hot .lid{background:var(--ember);color:#150a05}
+       57 +      .l2{margin-left:80px}.l3{margin-left:160px}.l4{margin-le
+          +ft:240px}
+       58 +
+       59 +      /* S3 equation */
+       60 +      #s3 .eq{display:flex;align-items:center;gap:48px;font-fa
+          +mily:var(--serif)}
+       61 +      #s3 .term{display:flex;flex-direction:column;align-items
+          +:center}
+       62 +      #s3 .term .big{font-size:150px;line-height:1}
+       63 +      #s3 .term .cap{font-family:var(--mono);font-size:24px;le
+          +tter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+          +margin-top:14px}
+       64 +      #s3 .op{font-size:120px;color:var(--ember)}
+       65 +      #s3 .agent .big{color:var(--ember)} #s3 .model .big{colo
+          +r:var(--bone)} #s3 .harness .big{color:var(--teal)}
+       66 +      #s3 .bolts{display:flex;gap:20px;margin-top:60px}
+       67 +      #s3 .bolt{border:1px solid var(--line);border-radius:999
+          +px;padding:16px 30px;background:var(--panel);
+       68 +        font-family:var(--mono);font-size:24px;color:var(--bon
+          +e-dim)}
+       69 +      #s3 .bolt b{color:var(--teal)}
+       70 +
+       71 +      /* S4 versus */
+       72 +      #s4 .cap{font-family:var(--serif);font-size:84px;margin-
+          +bottom:54px}
+       73 +      #s4 .cap .vs{font-style:italic;color:var(--muted);font-s
+          +ize:60px}
+       74 +      .vrow{display:flex;gap:40px}
+       75 +      .vcard{width:680px;border:1px solid var(--line);border-r
+          +adius:22px;background:var(--panel);padding:46px 48px;text-alig
+          +n:left}
+       76 +      .vcard .kind{font-family:var(--mono);font-size:22px;lett
+          +er-spacing:.06em;color:var(--muted)}
+       77 +      .vcard h3{font-family:var(--serif);font-size:90px;font-w
+          +eight:400;margin:6px 0 26px}
+       78 +      .vcard.agent h3{color:var(--ember-soft)} .vcard.flow h3{
+          +color:var(--teal)}
+       79 +      .vcard p{font-size:30px;line-height:1.5;color:var(--bone
+          +-dim);margin-bottom:14px}
+       80 +      .vcard p b{color:var(--bone)}
+       81 +      .vcard .pill{display:inline-block;font-family:var(--mono
+          +);font-size:21px;padding:8px 18px;border-radius:10px;backgroun
+          +d:#0b0e14;border:1px solid var(--line);color:var(--bone-dim);m
+          +argin-top:8px}
+       82 +
+       83 +      /* S5 trace */
+       84 +      #s5 .cap{font-family:var(--serif);font-size:80px;margin-
+          +bottom:46px}
+       85 +      #s5 .cap .mono{font-family:var(--mono);font-size:.62em;c
+          +olor:var(--ember)}
+       86 +      .flow{display:flex;align-items:stretch;gap:0}
+       87 +      .node{width:300px;border:1px solid var(--line);border-ra
+          +dius:18px;background:var(--panel);padding:28px 26px;text-align
+          +:left}
+       88 +      .node .k{font-family:var(--mono);font-size:21px;letter-s
+          +pacing:.14em;text-transform:uppercase;color:var(--muted)}
+       89 +      .node .h{font-family:var(--sans);font-weight:600;font-si
+          +ze:30px;color:var(--bone);margin:10px 0 8px;line-height:1.2}
+       90 +      .node .d{font-family:var(--mono);font-size:19px;color:va
+          +r(--bone-dim);line-height:1.4}
+       91 +      .node.turn{border-color:var(--ember);background:linear-g
+          +radient(180deg,#1a1108,var(--panel))}
+       92 +      .node.turn .k{color:var(--ember)}
+       93 +      .arrow{display:flex;align-items:center;justify-content:c
+          +enter;width:46px;color:var(--muted);font-size:34px;font-family
+          +:var(--mono)}
+       94 +      #s5 .banner{margin-top:46px;font-family:var(--serif);fon
+          +t-style:italic;font-size:52px;color:var(--bone)}
+       95 +      #s5 .banner b{color:var(--ember);font-style:normal;font-
+          +family:var(--mono);font-size:42px}
+       96 +
+       97 +      /* S6 outro */
+       98 +      #s6 .big{font-family:var(--serif);font-style:italic;font
+          +-size:96px;line-height:1.12;max-width:1500px}
+       99 +      #s6 .big .e{color:var(--ember);font-style:normal}
+      100 +      #s6 .big .t{color:var(--teal);font-style:normal}
+      101 +      #s6 .tag{font-family:var(--mono);font-size:26px;letter-s
+          +pacing:.3em;text-transform:uppercase;color:var(--muted);margin
+          +-top:50px}
+      102      </style>
+      103    </head>
+      104    <body>
+       24 -    <div
+       25 -      id="root"
+       26 -      data-composition-id="main"
+       27 -      data-start="0"
+       28 -      data-duration="10"
+       29 -      data-width="1920"
+       30 -      data-height="1080"
+       31 -    >
+       32 -
+       33 -
+      105 +    <div id="root" data-composition-id="main" data-start="0" d
+          +ata-duration="34" data-width="1920" data-height="1080">
+      106
+       35 -      <!--
+       36 -        Add your clips here. Example:
+       37 -        <div id="title" class="clip" data-start="0" data-durat
+          -ion="5" data-track-index="1"
+       38 -             style="font-size: 64px; color: #fff; padding: 40p
+          -x">
+       39 -          Hello World
+      107 +      <!-- static layers -->
+      108 +      <div class="bg-grid"></div>
+      109 +      <div class="bg-glow"></div>
+      110 +      <div class="framemark"><b>flue</b> <span class="slash">/
+          +</span> demystified</div>
+      111 +      <div class="footmark">The Agent Harness Framework</div>
+      112 +      <div class="pagemark" id="pagemark">001</div>
+      113 +
+      114 +      <!-- S1 — TITLE (0–5) -->
+      115 +      <div class="scene clip" data-start="0" data-duration="5"
+          + data-track-index="0" id="s1">
+      116 +        <div class="eyebrow" id="s1-eye">Field guide · what is
+          + this thing?</div>
+      117 +        <div id="s1-title">It's a <span class="it">harness</sp
+          +an>.</div>
+      118 +        <div id="s1-sub">the word just means three things</div
+          +>
+      119 +      </div>
+      120 +
+      121 +      <!-- S2 — THREE LAYERS (5–11) -->
+      122 +      <div class="scene clip" data-start="5" data-duration="6"
+          + data-track-index="1" id="s2">
+      123 +        <div class="cap" id="s2-cap">“Harness” means three thi
+          +ngs</div>
+      124 +        <div class="lstack">
+      125 +          <div class="layer hot l1" id="s2-l1"><span class="li
+          +d">3</span><span class="lt">Flue, the framework</span><span cl
+          +ass="lw">the whole project</span></div>
+      126 +          <div class="layer l2" id="s2-l2"><span class="lid">2
+          +</span><span class="lt">Flue's Harness — init(agent)</span><sp
+          +an class="lw">@flue/runtime</span></div>
+      127 +          <div class="layer l3" id="s2-l3"><span class="lid">↳
+          +</span><span class="lt">Session</span><span class="lw">session
+          +.ts</span></div>
+      128 +          <div class="layer l4" id="s2-l4"><span class="lid">1
+          +</span><span class="lt">The LLM loop</span><span class="lw">pi
+          +-agent-core</span></div>
+      129          </div>
+       41 -      -->
+      130 +      </div>
+      131 +
+      132 +      <!-- S3 — EQUATION (11–16) -->
+      133 +      <div class="scene clip" data-start="11" data-duration="5
+          +" data-track-index="2" id="s3">
+      134 +        <div class="eyebrow" id="s3-eye">The mental model</div
+          +>
+      135 +        <div class="eq">
+      136 +          <div class="term agent" id="s3-agent"><span class="b
+          +ig">agent</span><span class="cap">does work</span></div>
+      137 +          <div class="op" id="s3-op1">=</div>
+      138 +          <div class="term model" id="s3-model"><span class="b
+          +ig">model</span><span class="cap">the brain</span></div>
+      139 +          <div class="op" id="s3-op2">+</div>
+      140 +          <div class="term harness" id="s3-harness"><span clas
+          +s="big">harness</span><span class="cap">body + senses</span></
+          +div>
+      141 +        </div>
+      142 +        <div class="bolts">
+      143 +          <div class="bolt" id="s3-b1"><b>fs</b> · keep work</
+          +div>
+      144 +          <div class="bolt" id="s3-b2"><b>tools</b> · act</div
+          +>
+      145 +          <div class="bolt" id="s3-b3"><b>sandbox</b> · safely
+          +</div>
+      146 +          <div class="bolt" id="s3-b4"><b>context</b> · stay s
+          +harp</div>
+      147 +          <div class="bolt" id="s3-b5"><b>subagents</b> · para
+          +llel</div>
+      148 +        </div>
+      149 +      </div>
+      150 +
+      151 +      <!-- S4 — AGENTS VS WORKFLOWS (16–22) -->
+      152 +      <div class="scene clip" data-start="16" data-duration="6
+          +" data-track-index="3" id="s4">
+      153 +        <div class="cap" id="s4-cap">Agents <span class="vs">v
+          +s</span> Workflows</div>
+      154 +        <div class="vrow">
+      155 +          <div class="vcard agent" id="s4-agent">
+      156 +            <div class="kind">agents/&lt;name&gt;.ts</div>
+      157 +            <h3>Agents</h3>
+      158 +            <p><b>Addressable &amp; persistent.</b> Reached by
+          + URL, continue by id.</p>
+      159 +            <p>The runtime builds the harness for you.</p>
+      160 +            <span class="pill">POST /agents/&lt;name&gt;/&lt;i
+          +d&gt;</span>
+      161 +          </div>
+      162 +          <div class="vcard flow" id="s4-flow">
+      163 +            <div class="kind">workflows/&lt;name&gt;.ts</div>
+      164 +            <h3>Workflows</h3>
+      165 +            <p><b>Bounded jobs</b> with inspectable run histor
+          +y.</p>
+      166 +            <p>You call <b>init(agent)</b> yourself.</p>
+      167 +            <span class="pill">run() → runId · /runs · flue lo
+          +gs</span>
+      168 +          </div>
+      169 +        </div>
+      170 +      </div>
+      171 +
+      172 +      <!-- S5 — PROMPT() TURN BY TURN (22–29) -->
+      173 +      <div class="scene clip" data-start="22" data-duration="7
+          +" data-track-index="4" id="s5">
+      174 +        <div class="cap">One <span class="mono">prompt()</span
+          +>, turn by turn</div>
+      175 +        <div class="flow">
+      176 +          <div class="node" id="s5-a"><div class="k">A · setup
+          +</div><div class="h">Lock + tools</div><div class="d">runOpera
+          +tion · withCallOverrides</div></div>
+      177 +          <div class="arrow" id="s5-ar1">→</div>
+      178 +          <div class="node" id="s5-b"><div class="k">B · loop<
+          +/div><div class="h">Recovery wrapper</div><div class="d">runMo
+          +delTurnWithRecovery</div></div>
+      179 +          <div class="arrow" id="s5-ar2">→</div>
+      180 +          <div class="node turn" id="s5-c"><div class="k">C ·
+          +turns ⟳</div><div class="h">streamSimple → model</div><div cla
+          +ss="d">read · tool · observe (pi-agent-core)</div></div>
+      181 +          <div class="arrow" id="s5-ar3">→</div>
+      182 +          <div class="node" id="s5-d"><div class="k">D · retur
+          +n</div><div class="h">persist + return</div><div class="d">sav
+          +e() · { text, usage }</div></div>
+      183 +        </div>
+      184 +        <div class="banner" id="s5-banner">Flue's loop <b>≠</b
+          +> the agent loop</div>
+      185 +      </div>
+      186 +
+      187 +      <!-- S6 — OUTRO (29–34) -->
+      188 +      <div class="scene clip" data-start="29" data-duration="5
+          +" data-track-index="5" id="s6">
+      189 +        <div class="big" id="s6-line">Flue is to an <span clas
+          +s="e">agent harness</span><br>what Next.js is to a <span class
+          +="t">web server</span>.</div>
+      190 +        <div class="tag" id="s6-tag">it never reinvents the lo
+          +op — it builds everything around it</div>
+      191 +      </div>
+      192 +
+      193      </div>
+      194
+      195      <script>
+      196        window.__timelines = window.__timelines || {};
+      197        const tl = gsap.timeline({ paused: true });
+       47 -      // Example: tl.from("#title", { opacity: 0, y: -50, dura
+          -tion: 1 }, 0);
+      198 +
+      199 +      // ── S1 (0–5) ──
+      200 +      tl.from("#s1-eye",   {opacity:0, y:20, duration:.7}, 0.1
+          +5)
+      201 +        .from("#s1-title", {opacity:0, y:50, duration:1.0}, 0.
+          +35)
+      202 +        .from("#s1-title .it", {color:"#ece6d8", duration:.9},
+          + 1.0)
+      203 +        .from("#s1-sub",   {opacity:0, y:24, duration:.8}, 1.1
+          +)
+      204 +        .to(["#s1-eye","#s1-title","#s1-sub"], {opacity:0, dur
+          +ation:.5}, 4.5);
+      205 +
+      206 +      // ── S2 (5–11): layers cascade in, focus shifts to the
+          +deepest (layer 1) ──
+      207 +      tl.from("#s2-cap", {opacity:0, y:30, duration:.7}, 5.2)
+      208 +        .from("#s2-l1", {opacity:0, x:-40, duration:.55}, 5.6)
+      209 +        .from("#s2-l2", {opacity:0, x:-40, duration:.55}, 5.95
+          +)
+      210 +        .from("#s2-l3", {opacity:0, x:-40, duration:.55}, 6.30
+          +)
+      211 +        .from("#s2-l4", {opacity:0, x:-40, duration:.55}, 6.65
+          +)
+      212 +        // move the "hot" highlight from framework (l1) down t
+          +o the loop (l4)
+      213 +        .to("#s2-l1", {boxShadow:"0 0 0 1px rgba(236,230,216,.
+          +14)", backgroundColor:"#12161f", borderColor:"rgba(236,230,216
+          +,.14)", duration:.4}, 8.4)
+      214 +        .set("#s2-l1 .lid", {backgroundColor:"#b7b2a6", color:
+          +"#0a0c10"}, 8.4)
+      215 +        .to("#s2-l4", {borderColor:"#ff6a3d", backgroundColor:
+          +"#1a1108", boxShadow:"0 0 0 1px rgba(255,106,61,.4),0 30px 70p
+          +x -40px rgba(255,106,61,.6)", duration:.5}, 8.5)
+      216 +        .set("#s2-l4 .lid", {backgroundColor:"#ff6a3d", color:
+          +"#150a05"}, 8.6)
+      217 +        .to("#s2", {opacity:0, duration:.5}, 10.5);
+      218 +
+      219 +      // ── S3 (11–16): equation assembles, then bolts ──
+      220 +      tl.from("#s3-eye",     {opacity:0, y:20, duration:.6}, 1
+          +1.2)
+      221 +        .from("#s3-agent",   {opacity:0, scale:.8, duration:.6
+          +}, 11.5)
+      222 +        .from("#s3-op1",     {opacity:0, duration:.4}, 11.9)
+      223 +        .from("#s3-model",   {opacity:0, scale:.8, duration:.6
+          +}, 12.1)
+      224 +        .from("#s3-op2",     {opacity:0, duration:.4}, 12.5)
+      225 +        .from("#s3-harness", {opacity:0, scale:.8, duration:.6
+          +}, 12.7)
+      226 +        .from(["#s3-b1","#s3-b2","#s3-b3","#s3-b4","#s3-b5"],
+          +{opacity:0, y:24, duration:.5, stagger:.12}, 13.4)
+      227 +        .to("#s3", {opacity:0, duration:.5}, 15.5);
+      228 +
+      229 +      // ── S4 (16–22): two cards slide in from opposite sides
+          + ──
+      230 +      tl.from("#s4-cap",   {opacity:0, y:30, duration:.7}, 16.
+          +2)
+      231 +        .from("#s4-agent", {opacity:0, x:-70, duration:.8}, 16
+          +.6)
+      232 +        .from("#s4-flow",  {opacity:0, x:70,  duration:.8}, 16
+          +.8)
+      233 +        .to("#s4", {opacity:0, duration:.5}, 21.5);
+      234 +
+      235 +      // ── S5 (22–29): the flow lights up, C (the Turns) puls
+          +es ──
+      236 +      tl.from("#s5-a",   {opacity:0, y:30, duration:.5}, 22.4)
+      237 +        .from("#s5-ar1", {opacity:0, duration:.3}, 22.7)
+      238 +        .from("#s5-b",   {opacity:0, y:30, duration:.5}, 22.9)
+      239 +        .from("#s5-ar2", {opacity:0, duration:.3}, 23.2)
+      240 +        .from("#s5-c",   {opacity:0, y:30, duration:.5}, 23.4)
+      241 +        .from("#s5-ar3", {opacity:0, duration:.3}, 23.7)
+      242 +        .from("#s5-d",   {opacity:0, y:30, duration:.5}, 23.9)
+      243 +        // pulse the Turn node to show the inner loop iteratin
+          +g
+      244 +        .to("#s5-c", {scale:1.06, duration:.45, yoyo:true, rep
+          +eat:3}, 24.6)
+      245 +        .from("#s5-banner", {opacity:0, y:24, duration:.7}, 26
+          +.4)
+      246 +        .to("#s5", {opacity:0, duration:.5}, 28.5);
+      247 +
+      248 +      // ── S6 (29–34): the closing line ──
+      249 +      tl.from("#s6-line", {opacity:0, y:40, duration:1.0}, 29.
+          +4)
+      250 +        .from("#s6-tag",  {opacity:0, y:20, duration:.8}, 30.4
+          +);
+      251 +
+      252 +      // page marker ticks per scene (purely visual, determini
+          +stic)
+      253 +      tl.set("#pagemark", {innerText:"002"}, 5)
+      254 +        .set("#pagemark", {innerText:"003"}, 11)
+      255 +        .set("#pagemark", {innerText:"004"}, 16)
+      256 +        .set("#pagemark", {innerText:"005"}, 22)
+      257 +        .set("#pagemark", {innerText:"006"}, 29);
+      258 +
+      259        window.__timelines["main"] = tl;
+      260      </script>
+      261    </body>
+
+● Noted on the SRI warning — that GSAP CDN tag is HyperFrames' own scaffold
+  convention and the renderer pins gsap@3.14.2; adding an unverified integrity
+  hash risks breaking the render, so I'll leave it matching the scaffold (this
+  is a local render composition, not a deployed page). Now let me validate the
+  composition before rendering.
+
+● Bash(cd
+      "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs/video" &&      npm run check 2>&1 | tail -50; echo "---EXIT ${PIPESTATUS[0]}---")
+  ⎿      Fix: Add @font-face { font-family: '...'; src: url('capture/assets
+     /fonts/...woff2'); } for each font family, pointing to the captured .w
+     off2 files.
+     … +48 lines (ctrl+o to expand)
+  ⎿  (timeout 4m)
+
+● The composition validates with 0 errors in lint and headless-Chrome validation
+  — only contrast warnings (non-blocking) and 2 layout errors in S4 (text
+  overflow in the Workflows card) plus some transient animation-overflow infos.   Let me fix the S4 card so it's clean, then render. The fix: smaller body font,  guaranteed wrapping, shorter copy, and a y/opacity entrance instead of x
+  (which pushed content off-canvas mid-animation).
+
+● Update(index.html)
+  ⎿  Added 5 lines, removed 5 lines
+      72        #s4 .cap{font-family:var(--serif);font-size:84px;margin-b
+          ottom:54px}
+      73        #s4 .cap .vs{font-style:italic;color:var(--muted);font-si
+          ze:60px}
+      74        .vrow{display:flex;gap:40px}
+      75 -      .vcard{width:680px;border:1px solid var(--line);border-ra
+         -dius:22px;background:var(--panel);padding:46px 48px;text-align:
+         -left}
+      76 -      .vcard .kind{font-family:var(--mono);font-size:22px;lette
+         -r-spacing:.06em;color:var(--muted)}
+      77 -      .vcard h3{font-family:var(--serif);font-size:90px;font-we
+         -ight:400;margin:6px 0 26px}
+      75 +      .vcard{width:660px;border:1px solid var(--line);border-ra
+         +dius:22px;background:var(--panel);padding:44px 46px;text-align:
+         +left}
+      76 +      .vcard .kind{font-family:var(--mono);font-size:21px;lette
+         +r-spacing:.04em;color:var(--muted)}
+      77 +      .vcard h3{font-family:var(--serif);font-size:84px;font-we
+         +ight:400;margin:6px 0 24px}
+      78        .vcard.agent h3{color:var(--ember-soft)} .vcard.flow h3{c
+          olor:var(--teal)}
+      79 -      .vcard p{font-size:30px;line-height:1.5;color:var(--bone-
+         -dim);margin-bottom:14px}
+      79 +      .vcard p{font-size:27px;line-height:1.45;color:var(--bone
+         +-dim);margin-bottom:14px;max-width:560px;overflow-wrap:break-wo
+         +rd}
+      80        .vcard p b{color:var(--bone)}
+      81 -      .vcard .pill{display:inline-block;font-family:var(--mono)
+         -;font-size:21px;padding:8px 18px;border-radius:10px;background:
+         -#0b0e14;border:1px solid var(--line);color:var(--bone-dim);marg
+         -in-top:8px}
+      81 +      .vcard .pill{display:inline-block;font-family:var(--mono)
+         +;font-size:19px;padding:8px 16px;border-radius:10px;background:
+         +#0b0e14;border:1px solid var(--line);color:var(--bone-dim);marg
+         +in-top:8px;max-width:560px;overflow-wrap:break-word}
+      82
+      83        /* S5 trace */
+      84        #s5 .cap{font-family:var(--serif);font-size:80px;margin-b
+          ottom:46px}
+
+● Update(index.html)
+  ⎿  Added 1 line, removed 1 line
+      164              <h3>Workflows</h3>
+      165              <p><b>Bounded jobs</b> with inspectable run histor
+           y.</p>
+      166              <p>You call <b>init(agent)</b> yourself.</p>
+      167 -            <span class="pill">run() → runId · /runs · flue lo
+          -gs</span>
+      167 +            <span class="pill">run() → runId · /runs</span>
+      168            </div>
+      169          </div>
+      170        </div>
+
+● Update(index.html)
+  ⎿  Added 2 lines, removed 2 lines
+      228
+      229        // ── S4 (16–22): two cards slide in from opposite sides
+            ──
+      230        tl.from("#s4-cap",   {opacity:0, y:30, duration:.7}, 16.
+           2)
+      231 -        .from("#s4-agent", {opacity:0, x:-70, duration:.8}, 16
+          -.6)
+      232 -        .from("#s4-flow",  {opacity:0, x:70,  duration:.8}, 16
+          -.8)
+      231 +        .from("#s4-agent", {opacity:0, y:46, duration:.8}, 16.
+          +6)
+      234
+      235        // ── S5 (22–29): the flow lights up, C (the Turns) puls
+           es ──
+
+● Bash(cd
+      "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs/video" &&
+      npx --yes hyperframes@0.6.70 inspect 2>&1 | tail -25; echo "---EXIT
+      ${PIPESTATUS[0…)
+  ⎿  ◆  Inspecting layout for video (9 timeline samples)
+
+       ✗ t=17-20.78s (2 samples) text_box_overflow #s4-flow > p:nth-of-type
+     … +14 lines (ctrl+o to expand)
+  ⎿  (timeout 3m)
+
+● The inspector keys on the inline <b> elements — when a bolded phrase like
+  "Bounded jobs" wraps across two lines, its bounding box spans wide and trips
+  the overflow heuristic. Fix: keep the bold phrases on one line
+  (white-space:nowrap) and pin the paragraph width.
+
+● Update(index.html)
+  ⎿  Added 2 lines, removed 2 lines
+      76        .vcard .kind{font-family:var(--mono);font-size:21px;lette
+          r-spacing:.04em;color:var(--muted)}
+      77        .vcard h3{font-family:var(--serif);font-size:84px;font-we
+          ight:400;margin:6px 0 24px}
+      78        .vcard.agent h3{color:var(--ember-soft)} .vcard.flow h3{c
+          olor:var(--teal)}
+      79 -      .vcard p{font-size:27px;line-height:1.45;color:var(--bone
+         --dim);margin-bottom:14px;max-width:560px;overflow-wrap:break-wo
+         -rd}
+      80 -      .vcard p b{color:var(--bone)}
+      79 +      .vcard p{font-size:26px;line-height:1.45;color:var(--bone
+         +-dim);margin-bottom:14px;width:540px;overflow-wrap:break-word}
+      80 +      .vcard p b{color:var(--bone);white-space:nowrap}
+      81        .vcard .pill{display:inline-block;font-family:var(--mono)
+          ;font-size:19px;padding:8px 16px;border-radius:10px;background:
+          #0b0e14;border:1px solid var(--line);color:var(--bone-dim);marg
+          in-top:8px;max-width:560px;overflow-wrap:break-word}
+      82
+      83        /* S5 trace */
+
+● Bash(cd
+      "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs/video" &&      npx --yes hyperframes@0.6.70 inspect 2>&1 | tail -16; echo "---EXIT
+      ${PIPESTATUS[0…)
+  ⎿  ◆  Inspecting layout for video (9 timeline samples)
+
+       ✗ t=17-20.78s (2 samples) text_box_overflow #s4-flow > p:nth-of-type
+     … +14 lines (ctrl+o to expand)
+  ⎿  (timeout 3m)
+
+● The inspector consistently flags only the inline <b> elements (its
+  b:nth-of-type(1) selector), and the reported geometry doesn't match the actual  left-aligned layout — it's an inspector quirk measuring inline children         inside a width-pinned paragraph within a centered flex scene. The clean fix is  to drop inline <b> in S4 entirely and carry emphasis through color on the
+  whole line.
+
+● Update(index.html)
+  ⎿  Added 4 lines, removed 4 lines
+      155            <div class="vcard agent" id="s4-agent">
+      156              <div class="kind">agents/&lt;name&gt;.ts</div>
+      157              <h3>Agents</h3>
+      158 -            <p><b>Addressable &amp; persistent.</b> Reached by
+          - URL, continue by id.</p>
+      159 -            <p>The runtime builds the harness for you.</p>
+      158 +            <p class="lead">Addressable &amp; persistent.</p>
+      159 +            <p>Reached by URL · the runtime builds the harness
+          + for you.</p>
+      160              <span class="pill">POST /agents/&lt;name&gt;/&lt;i
+           d&gt;</span>
+      161            </div>
+      162            <div class="vcard flow" id="s4-flow">
+      163              <div class="kind">workflows/&lt;name&gt;.ts</div>
+      164              <h3>Workflows</h3>
+      165 -            <p><b>Bounded jobs</b> with inspectable run histor
+          -y.</p>
+      166 -            <p>You call <b>init(agent)</b> yourself.</p>
+      165 +            <p class="lead">Bounded jobs, inspectable runs.</p
+          +>
+      166 +            <p>You call init(agent) yourself.</p>
+      167              <span class="pill">run() → runId · /runs</span>
+      168            </div>
+      169          </div>
+
+● Update(index.html)
+  ⎿  Added 1 line, removed 1 line
+      77        .vcard h3{font-family:var(--serif);font-size:84px;font-we
+          ight:400;margin:6px 0 24px}
+      78        .vcard.agent h3{color:var(--ember-soft)} .vcard.flow h3{c
+          olor:var(--teal)}
+      79        .vcard p{font-size:26px;line-height:1.45;color:var(--bone
+          -dim);margin-bottom:14px;width:540px;overflow-wrap:break-word}
+      80 -      .vcard p b{color:var(--bone);white-space:nowrap}
+      80 +      .vcard p.lead{color:var(--bone);font-weight:600}
+          in-top:8px;max-width:560px;overflow-wrap:break-word}
+      82
+      83        /* S5 trace */
+
+● Bash(cd
+      "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs/video" &&
+      npx --yes hyperframes@0.6.70 inspect 2>&1 | tail -14; echo "---EXIT
+      ${PIPESTATUS[0…)
+  ⎿  ◆  Inspecting layout for video (9 timeline samples)
+
+       ✗ t=17-20.78s (2 samples) text_box_overflow p.lead inside #s4-flow o
+     … +14 lines (ctrl+o to expand)
+  ⎿  (timeout 3m)
+
+● The inspector is squeezing the flow-card text into a phantom ~143px-wide
+  column at x≈600 — geometry that can't occur in the actual left-aligned rest
+  layout (the headless-Chrome validate pass reported 0 errors). This is a
+  known-style false positive from font-load timing during inspect sampling. The
+  real test is the rendered pixels. Let me shorten S4 text defensively for
+  genuine safety, then render and verify the actual frames.
+
+● Update(index.html)
+  ⎿  Added 1 line, removed 1 line
+      156              <div class="kind">agents/&lt;name&gt;.ts</div>
+      157              <h3>Agents</h3>
+      158              <p class="lead">Addressable &amp; persistent.</p>
+      159 -            <p>Reached by URL · the runtime builds the harness
+          - for you.</p>
+      159 +            <p>Reached by URL; the runtime builds the harness.
+          +</p>
+      160              <span class="pill">POST /agents/&lt;name&gt;/&lt;i
+           d&gt;</span>
+      161            </div>
+      162            <div class="vcard flow" id="s4-flow">
+
+● Now let me render to MP4 and capture the result.
+
+● Bash(cd
+      "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs/video" &&      npm run render 2>&1 | tail -40; echo "---EXIT ${PIPESTATUS[0]}---"; echo
+      "=== outp…)
+  ⎿  Error: Exit code 2
+
+     ◆  Rendering video → C:\Users\simon\Downloads\astro_flue_better_stack\flue-
+     main\docs\video\renders\video_2026-06-03_12-19-56.mp4
+        30fps · standard · auto workers (12 cores detected)
+        GPU: browser GPU (auto-detect)
+
+     |
+     o  Browser: cache
+
+       ⚠ gsap_exit_missing_hard_kill: GSAP exit on "#s1-eye, #s1-title, #s1-sub"
+     ends at the 5.00s clip start boundary without a matching tl.set hard kill.
+     Non-linear seeking can land after the fade and leave stale visibility
+     state.
+     … +34 lines (ctrl+o to expand)
+
+● Render succeeded — renders/video_…12-19-56.mp4, 3.7 MB, 34s — and notably the
+  render's own lint did not reproduce the S4 overflow errors, confirming those
+  were inspector false positives. But the render log surfaced two real quality
+  issues:
+
+  1. Fonts fell back to generic — the compiler reads font-family values
+  statically and saw the literal string var(--serif) (it doesn't resolve CSS
+  variables), so it couldn't map my fonts. My typography didn't render.
+  2. gsap_exit_missing_hard_kill — scene fade-outs need a tl.set(opacity:0)
+  hard-kill at each boundary because the renderer seeks every frame
+  independently.
+
+  Let me verify the real pixels first (is S4 actually fine? did fonts really
+  fall back?) by extracting frames from the current MP4.
+
+● Bash(cd
+      "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs/video" &&      mkdir -p _frames && M=$(ls -t renders/*.mp4 | head -1) && echo "from: $M"
+      && for t…)
+  ⎿  from: renders/video_2026-06-03_12-19-56.mp4
+     total 2392
+     drwxr-xr-x 1 simon 197609      0 Jun  3 12:22 .
+     … +7 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+
+● Let me look at the key frames — S2 (layers), S4 (the card that the inspector
+  flagged), and S5 (trace).
+
+  Read 2 files (ctrl+o to expand)
+
+● The render reveals the inspector was right — S4's Workflows (right) card is
+  genuinely broken: title shoved left, body text overflowing off the right edge.
+  The headless validate pass missed it but the pixels don't lie. Let me check
+  the other complex scenes before fixing.
+
+  Read 1 file (ctrl+o to expand)
+
+● S5 (the trace flow) looks excellent — A→B→C→D with C highlighted as the
+  pi-agent-core "TURNS" node. Let me check S1 and S6.
+
+  Read 1 file (ctrl+o to expand)
+
+● S1 looks strong. Let me check S6, then apply all fixes at once.
+
+  Read 1 file (ctrl+o to expand)
+
+● 5 of 6 scenes are excellent (S1, S2, S3, S5, S6). Only S4 is genuinely broken
+  — so the inspector was right and validate missed it. I'll fix S4 with a
+  bulletproof grid layout, and since I'm re-rendering anyway, also fix the two
+  real warnings: switch to render-mapped fonts (Playfair Display / JetBrains      Mono / Outfit — the compiler can't resolve var() font names) and add the
+  hard-kill tl.set calls for frame-accurate seeking.
+
+● Update(index.html)
+  ⎿  Added 9 lines, removed 9 lines
+      39        .eyebrow.teal{color:var(--teal)}
+      40
+      41        /* S1 */
+      42 -      #s1-title{font-family:var(--serif);font-size:200px;line-h
+         -eight:.9;letter-spacing:-.01em}
+      42 +      #s1-title{font-family:'Playfair Display',Georgia,serif;fo
+         +nt-size:200px;line-height:.9;letter-spacing:-.01em}
+      43        #s1-title .it{font-style:italic;color:var(--ember)}
+      44 -      #s1-sub{font-family:var(--serif);font-style:italic;font-s
+         -ize:52px;color:var(--bone-dim);margin-top:30px}
+      44 +      #s1-sub{font-family:'Playfair Display',Georgia,serif;font
+         +-style:italic;font-size:52px;color:var(--bone-dim);margin-top:3
+         +0px}
+      45
+      46        /* S2 layers */
+      47 -      #s2 .cap{font-family:var(--serif);font-size:84px;margin-b
+         -ottom:50px}
+      47 +      #s2 .cap{font-family:'Playfair Display',Georgia,serif;fon
+         +t-size:84px;margin-bottom:50px}
+      48        .lstack{display:flex;flex-direction:column;gap:20px;width
+          :1180px}
+      49        .layer{position:relative;border:1px solid var(--line);bor
+          der-radius:18px;background:var(--panel);
+      50          padding:26px 34px;text-align:left;display:flex;align-it
+          ems:center;gap:26px}
+     ...
+      57        .l2{margin-left:80px}.l3{margin-left:160px}.l4{margin-lef
+          t:240px}
+      58
+      59        /* S3 equation */
+      60 -      #s3 .eq{display:flex;align-items:center;gap:48px;font-fam
+         -ily:var(--serif)}
+      60 +      #s3 .eq{display:flex;align-items:center;gap:48px;font-fam
+         +ily:'Playfair Display',Georgia,serif}
+      61        #s3 .term{display:flex;flex-direction:column;align-items:
+          center}
+      62        #s3 .term .big{font-size:150px;line-height:1}
+      63        #s3 .term .cap{font-family:var(--mono);font-size:24px;let
+          ter-spacing:.2em;text-transform:uppercase;color:var(--muted);ma
+          rgin-top:14px}
+     ...
+      69        #s3 .bolt b{color:var(--teal)}
+      70
+      71        /* S4 versus */
+      72 -      #s4 .cap{font-family:var(--serif);font-size:84px;margin-b
+         -ottom:54px}
+      72 +      #s4 .cap{font-family:'Playfair Display',Georgia,serif;fon
+         +t-size:84px;margin-bottom:54px}
+      73        #s4 .cap .vs{font-style:italic;color:var(--muted);font-si
+          ze:60px}
+      74        .vrow{display:flex;gap:40px}
+      75        .vcard{width:660px;border:1px solid var(--line);border-ra
+          dius:22px;background:var(--panel);padding:44px 46px;text-align:
+          left}
+      76        .vcard .kind{font-family:var(--mono);font-size:21px;lette
+          r-spacing:.04em;color:var(--muted)}
+      77 -      .vcard h3{font-family:var(--serif);font-size:84px;font-we
+         -ight:400;margin:6px 0 24px}
+      77 +      .vcard h3{font-family:'Playfair Display',Georgia,serif;fo
+         +nt-size:84px;font-weight:400;margin:6px 0 24px}
+      78        .vcard.agent h3{color:var(--ember-soft)} .vcard.flow h3{c
+          olor:var(--teal)}
+      79        .vcard p{font-size:26px;line-height:1.45;color:var(--bone
+          -dim);margin-bottom:14px;width:540px;overflow-wrap:break-word}
+      80        .vcard p.lead{color:var(--bone);font-weight:600}
+      81        .vcard .pill{display:inline-block;font-family:var(--mono)
+          ;font-size:19px;padding:8px 16px;border-radius:10px;background:
+          #0b0e14;border:1px solid var(--line);color:var(--bone-dim);marg
+          in-top:8px;max-width:560px;overflow-wrap:break-word}
+      82
+      83        /* S5 trace */
+      84 -      #s5 .cap{font-family:var(--serif);font-size:80px;margin-b
+         -ottom:46px}
+      84 +      #s5 .cap{font-family:'Playfair Display',Georgia,serif;fon
+         +t-size:80px;margin-bottom:46px}
+      85        #s5 .cap .mono{font-family:var(--mono);font-size:.62em;co
+          lor:var(--ember)}
+      86        .flow{display:flex;align-items:stretch;gap:0}
+      87        .node{width:300px;border:1px solid var(--line);border-rad
+          ius:18px;background:var(--panel);padding:28px 26px;text-align:l
+          eft}
+     ...
+       91        .node.turn{border-color:var(--ember);background:linear-g
+           radient(180deg,#1a1108,var(--panel))}
+       92        .node.turn .k{color:var(--ember)}
+       93        .arrow{display:flex;align-items:center;justify-content:c
+           enter;width:46px;color:var(--muted);font-size:34px;font-family
+           :var(--mono)}
+       94 -      #s5 .banner{margin-top:46px;font-family:var(--serif);fon
+          -t-style:italic;font-size:52px;color:var(--bone)}
+       94 +      #s5 .banner{margin-top:46px;font-family:'Playfair Displa
+          +y',Georgia,serif;font-style:italic;font-size:52px;color:var(--
+          +bone)}
+       95        #s5 .banner b{color:var(--ember);font-style:normal;font-
+           family:var(--mono);font-size:42px}
+       96
+           nt-style:italic;font-size:96px;line-height:1.12;max-width:1500
+           px}
+       99        #s6 .big .e{color:var(--ember);font-style:normal}
+      100        #s6 .big .t{color:var(--teal);font-style:normal}
+      101 -      #s6 .tag{font-family:var(--mono);font-size:26px;letter-s
+          -pacing:.3em;text-transform:uppercase;color:var(--muted);margin
+          --top:50px}
+      101 +      #s6 .tag{font-family:'JetBrains Mono',ui-monospace,monos
+          +pace;font-size:26px;letter-spacing:.3em;text-transform:upperca
+          +se;color:var(--muted);margin-top:50px}
+      102      </style>
+      103    </head>
+      104    <body>
+
+● Update(index.html)
+  ⎿  Added 2 lines, removed 2 lines
+      15          --serif:"Instrument Serif",Georgia,serif; --sans:"Splin
+          e Sans",system-ui,sans-serif;
+      16          --mono:"JetBrains Mono",ui-monospace,monospace;
+      17        }
+      18 -      html,body{width:1920px;height:1080px;overflow:hidden;back
+         -ground:var(--ink);color:var(--bone);font-family:var(--sans)}
+      18 +      html,body{width:1920px;height:1080px;overflow:hidden;back
+         +ground:var(--ink);color:var(--bone);font-family:'Outfit',system
+         +-ui,sans-serif}
+      19        #root{position:relative;width:1920px;height:1080px}
+      20
+      21        /* ---- static atmosphere (always visible) ---- */
+     ...
+      86        .flow{display:flex;align-items:stretch;gap:0}
+      87        .node{width:300px;border:1px solid var(--line);border-rad
+          ius:18px;background:var(--panel);padding:28px 26px;text-align:l
+          eft}
+      88        .node .k{font-family:'JetBrains Mono',ui-monospace,monosp
+          ace;font-size:21px;letter-spacing:.14em;text-transform:uppercas
+          e;color:var(--muted)}
+      89 -      .node .h{font-family:var(--sans);font-weight:600;font-siz
+         -e:30px;color:var(--bone);margin:10px 0 8px;line-height:1.2}
+      89 +      .node .h{font-family:'Outfit',system-ui,sans-serif;font-w
+         +eight:600;font-size:30px;color:var(--bone);margin:10px 0 8px;li
+         +ne-height:1.2}
+      90        .node .d{font-family:'JetBrains Mono',ui-monospace,monosp
+          ace;font-size:19px;color:var(--bone-dim);line-height:1.4}
+      91        .node.turn{border-color:var(--ember);background:linear-gr
+          adient(180deg,#1a1108,var(--panel))}
+      92        .node.turn .k{color:var(--ember)}
+
+● Update(index.html)
+  ⎿  Added 1 line, removed 1 line
+       6      <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/
+          gsap.min.js"></script>
+       7      <link rel="preconnect" href="https://fonts.googleapis.com"
+          />
+       8      <link rel="preconnect" href="https://fonts.gstatic.com" cro
+          ssorigin />
+       9 -    <link href="https://fonts.googleapis.com/css2?family=Instru
+         -ment+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&fami
+         -ly=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet"
+         -/>
+       9 +    <link href="https://fonts.googleapis.com/css2?family=Playfa
+         +ir+Display:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wg
+         +ht@400;500;700&family=Outfit:wght@400;500;600&display=swap" rel
+         +="stylesheet" />
+      10      <style>
+      11        *{margin:0;padding:0;box-sizing:border-box}
+      12        :root{
+
+● Now the S4 structural fix — grid columns + flex-start + overflow clip:
+
+● Update(index.html)
+  ⎿  Added 2 lines, removed 2 lines
+      71        /* S4 versus */
+      72        #s4 .cap{font-family:'Playfair Display',Georgia,serif;fon
+          t-size:84px;margin-bottom:54px}
+      73        #s4 .cap .vs{font-style:italic;color:var(--muted);font-si
+          ze:60px}
+      74 -      .vrow{display:flex;gap:40px}
+      75 -      .vcard{width:660px;border:1px solid var(--line);border-ra
+         -dius:22px;background:var(--panel);padding:44px 46px;text-align:
+         -left}
+      74 +      .vrow{display:grid;grid-template-columns:660px 660px;gap:
+         +40px;justify-content:center}
+      75 +      .vcard{width:660px;border:1px solid var(--line);border-ra
+         +dius:22px;background:var(--panel);padding:44px 46px;text-align:
+         +left;overflow:hidden;display:flex;flex-direction:column;align-i
+         +tems:flex-start}
+      76        .vcard .kind{font-family:'JetBrains Mono',ui-monospace,mo
+          nospace;font-size:21px;letter-spacing:.04em;color:var(--muted)}
+      77        .vcard h3{font-family:'Playfair Display',Georgia,serif;fo
+          nt-size:84px;font-weight:400;margin:6px 0 24px}
+      78        .vcard.agent h3{color:var(--ember-soft)} .vcard.flow h3{c
+          olor:var(--teal)}
+
+● Update(index.html)
+  ⎿  Added 1 line, removed 1 line
+      76        .vcard .kind{font-family:'JetBrains Mono',ui-monospace,mo
+          nospace;font-size:21px;letter-spacing:.04em;color:var(--muted)}
+      77        .vcard h3{font-family:'Playfair Display',Georgia,serif;fo
+          nt-size:84px;font-weight:400;margin:6px 0 24px}
+      78        .vcard.agent h3{color:var(--ember-soft)} .vcard.flow h3{c
+          olor:var(--teal)}
+      79 -      .vcard p{font-size:26px;line-height:1.45;color:var(--bone
+         --dim);margin-bottom:14px;width:540px;overflow-wrap:break-word}
+      79 +      .vcard p{font-size:26px;line-height:1.45;color:var(--bone
+            1.0)
+      203          .from("#s1-sub",   {opacity:0, y:24, duration:.8}, 1.1
+           )
+      204 -        .to(["#s1-eye","#s1-title","#s1-sub"], {opacity:0, dur
+          -ation:.5}, 4.5);
+      204 +        .to(["#s1-eye","#s1-title","#s1-sub"], {opacity:0, dur
+          +ation:.5}, 4.5)
+      205 +        .set(["#s1-eye","#s1-title","#s1-sub"], {opacity:0}, 5
+          +.0);
+      206
+      207        // ── S2 (5–11): layers cascade in, focus shifts to the
+           deepest (layer 1) ──
+      208        tl.from("#s2-cap", {opacity:0, y:30, duration:.7}, 5.2)
+
+● Update(index.html)
+  ⎿  Added 2 lines, removed 1 line
+      215          .set("#s2-l1 .lid", {backgroundColor:"#b7b2a6", color:
+           "#0a0c10"}, 8.4)
+      216          .to("#s2-l4", {borderColor:"#ff6a3d", backgroundColor:
+           "#1a1108", boxShadow:"0 0 0 1px rgba(255,106,61,.4),0 30px 70p
+           x -40px rgba(255,106,61,.6)", duration:.5}, 8.5)
+      217          .set("#s2-l4 .lid", {backgroundColor:"#ff6a3d", color:
+           "#150a05"}, 8.6)
+      218 -        .to("#s2", {opacity:0, duration:.5}, 10.5);
+      218 +        .to("#s2", {opacity:0, duration:.5}, 10.5)
+      219 +        .set("#s2", {opacity:0}, 11.0);
+      220
+      221        // ── S3 (11–16): equation assembles, then bolts ──
+      222        tl.from("#s3-eye",     {opacity:0, y:20, duration:.6}, 1
+           1.2)
+
+● Update(index.html)
+  ⎿  Added 2 lines, removed 1 line
+      226          .from("#s3-op2",     {opacity:0, duration:.4}, 12.5)
+      227          .from("#s3-harness", {opacity:0, scale:.8, duration:.6
+           }, 12.7)
+      228          .from(["#s3-b1","#s3-b2","#s3-b3","#s3-b4","#s3-b5"],
+           {opacity:0, y:24, duration:.5, stagger:.12}, 13.4)
+      229 -        .to("#s3", {opacity:0, duration:.5}, 15.5);
+      229 +        .to("#s3", {opacity:0, duration:.5}, 15.5)
+      230 +        .set("#s3", {opacity:0}, 16.0);
+      231
+      232        // ── S4 (16–22): two cards slide in from opposite sides
+            ──
+      233        tl.from("#s4-cap",   {opacity:0, y:30, duration:.7}, 16.
+           2)
+
+● Update(index.html)
+  ⎿  Added 2 lines, removed 1 line
+      233        tl.from("#s4-cap",   {opacity:0, y:30, duration:.7}, 16.
+           2)
+      234          .from("#s4-agent", {opacity:0, y:46, duration:.8}, 16.
+           6)
+      235          .from("#s4-flow",  {opacity:0, y:46, duration:.8}, 16.
+           8)
+      236 -        .to("#s4", {opacity:0, duration:.5}, 21.5);
+      236 +        .to("#s4", {opacity:0, duration:.5}, 21.5)
+      237 +        .set("#s4", {opacity:0}, 22.0);
+      238
+      239        // ── S5 (22–29): the flow lights up, C (the Turns) puls
+           es ──
+      240        tl.from("#s5-a",   {opacity:0, y:30, duration:.5}, 22.4)
+
+● Update(index.html)
+  ⎿  Added 2 lines, removed 1 line
+      247          // pulse the Turn node to show the inner loop iteratin
+           g
+      248          .to("#s5-c", {scale:1.06, duration:.45, yoyo:true, rep
+           eat:3}, 24.6)
+      249          .from("#s5-banner", {opacity:0, y:24, duration:.7}, 26
+           .4)
+      250 -        .to("#s5", {opacity:0, duration:.5}, 28.5);
+      250 +        .to("#s5", {opacity:0, duration:.5}, 28.5)
+      251 +        .set("#s5", {opacity:0}, 29.0);
+      254        tl.from("#s6-line", {opacity:0, y:40, duration:1.0}, 29.
+           4)
+
+● Now re-render with all fixes applied.
+
+● Bash(cd
+      "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs/video" &&
+      rm -f renders/*.mp4 && npm run render 2>&1 | grep -vE "Capturing
+      frame|██|░░" | ta…)
+  ⎿  > render
+     > npx --yes hyperframes@0.6.70 render
+     … +33 lines (ctrl+o to expand)
+  ⎿  (timeout 9m)
+
+● Clean re-render — fonts now resolved deterministically ("Fetched 60 font faces
+  for JetBrains Mono", "Playfair Display"), and the hard-kill warnings are
+  gone. Let me verify the S4 fix and the new typography in the actual pixels.
+
+● Bash(cd
+      "C:/Users/simon/Downloads/astro_flue_better_stack/flue-main/docs/video" &&      rm -f _frames/*.png && M=$(ls -t renders/*.mp4 | head -1) && for t in 02        08 13 18.…)
+  ⎿  g_02.png
+     g_08.png
+     g_13.png
+     … +2 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+
+  Read 1 file (ctrl+o to expand)
+
+● S4 is fixed — both cards now sit cleanly side by side, text properly
+  contained, with crisp Playfair Display headings (ember "Agents" / teal
+  "Workflows") and JetBrains Mono labels. Let me confirm S2 and the title look
+  right with the new fonts.
+
+  Read 1 file (ctrl+o to expand)
+
+      cp "$(ls -t video/renders/*.mp4 | head -1)" flue-demystified.mp4 && rm -rf      video/_frames…)
+  ⎿  === docs/ deliverables ===
+     -rw-r--r-- 1 simon 197609   21022 Jun  3 11:23 FLUE-DEMYSTIFIED.md
+     -rw-r--r-- 1 simon 197609   35218 Jun  3 12:10 flue-demystified.html
+     … +5 lines (ctrl+o to expand)
+
+● All three deliverables are in docs/. Let me surface the video to you.
+
+● flue-demystified.mp4 — 34s, 1080p, rendered with HyperFrames from the same
+  content as the interactive page
+
+  › [file] flue-demystified.mp4 (3.8MB)
+
+● Both deliverables are done and verified in real pixels.
+
+  What you got — all in docs/
+
+  ┌─────────────────────────────────┬────────────────────────────────────────┐
+  │              File               │               What it is               │
+  ├─────────────────────────────────┼────────────────────────────────────────┤
+  │ flue-demystified.html (35 KB)   │ Standalone interactive page — no       │
+  │                                 │ build, no deps                         │
+  ├─────────────────────────────────┼────────────────────────────────────────┤
+  │ flue-demystified.mp4 (3.8 MB,   │ HyperFrames-rendered explainer video   │
+  │ 34s, 1080p)                     │                                        │
+  ├─────────────────────────────────┼────────────────────────────────────────┤
+  │ FLUE-DEMYSTIFIED.md             │ the source write-up (unchanged)        │
+  ├─────────────────────────────────┼────────────────────────────────────────┤
+  │ video/                          │ the HyperFrames project (composition + │
+  │                                 │  render toolchain)                     │
+  └─────────────────────────────────┴────────────────────────────────────────┘
+
+  Interactive HTML — an "engineering field-guide" aesthetic (Instrument Serif +
+  JetBrains Mono on a near-black blueprint grid, ember/teal "heat" palette
+  fitting flue). Four live pieces:
+  - hero word-morph cycling the overloaded meanings of "harness"
+  - a click-to-scope 3-layer decoder (framework → Harness → Session → loop)
+  - the agent = model + harness equation with hover bolts
+  - the showpiece: a prompt() trace player that animates all 7 steps and flags
+  which are pi-agent-core Turns vs. Flue orchestration
+
+  Video — 6 scenes mirroring the doc: title → "harness means three things" → the
+  equation → Agents vs Workflows → the prompt() A→B→C→D flow → the Next.js
+  closing analogy. Rendered locally via HyperFrames (npx hyperframes render),
+  Playfair Display / JetBrains Mono / Outfit supplied deterministically.
+
+  How "hyperframe" got solved
+
+  It's HyperFrames by HeyGen — "write HTML, render video." It was catalogued but
+  not installed, which is why it wasn't a tool I had. I scaffolded it with npx
+  hyperframes init, authored the composition, and rendered — fully local (Node
+  22 + FFmpeg, no API key).
+
+  Two things worth flagging honestly
+
+  1. The validator lied; the pixels told the truth. HyperFrames' headless
+  validate pass reported 0 errors on S4, but inspect flagged text overflow — and
+  when I extracted actual frames, S4 was genuinely broken (Workflows card
+  spilling off-canvas). I'd initially leaned toward dismissing it as a false
+  positive; rendering and looking at real frames is what caught it. Fixed with a
+  grid layout.
+  2. Fonts needed render-mapped names. HyperFrames' compiler reads font-family
+  statically and can't resolve CSS var(), so my first render fell back to
+  generic fonts. Switching to compiler-recognized families (Playfair Display,
+  JetBrains Mono, Outfit) fixed the typography.
+
+  To re-render after any edit: cd docs/video && npm run render. To preview the
+  composition live: npm run dev.
+
+  Want me to tweak the video — different pacing, a voiceover track (HyperFrames
+  supports local Kokoro TTS), or captions burned in?
+
+✻ Sautéed for 27m 6s
+
+※ recap: Goal: demystify Flue and produce explainer artifacts. I've delivered
+  three files in docs/: the write-up, an interactive HTML page, and a 34-second   HyperFrames video, all verified. Next action is awaiting your feedback or any
+  tweaks to the video.
+
+──────────────────────────────────────────────────────────────────────── flue ──> 
+────────────────────────────────────────────────────────────────────────────────
+  | Opus 4.8 (1M context) | docs | ctx 24% | 5h 20% | 7d 15% |
+  ⏵⏵ bypass permissions on (shift+tab to cycle) · ← for agents
+                                        new task? /clear to save 237.4k tokens
+                                                         Remote Control active
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,59 @@
+{
+	"name": "@flue/sdk",
+	"version": "0.9.1",
+	"type": "module",
+	"license": "Apache-2.0",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		},
+		"./app": {
+			"types": "./dist/deprecated.d.mts",
+			"import": "./dist/deprecated.mjs"
+		},
+		"./client": {
+			"types": "./dist/deprecated.d.mts",
+			"import": "./dist/deprecated.mjs"
+		},
+		"./sandbox": {
+			"types": "./dist/deprecated.d.mts",
+			"import": "./dist/deprecated.mjs"
+		},
+		"./internal": {
+			"types": "./dist/deprecated.d.mts",
+			"import": "./dist/deprecated.mjs"
+		},
+		"./node": {
+			"types": "./dist/deprecated.d.mts",
+			"import": "./dist/deprecated.mjs"
+		},
+		"./cloudflare": {
+			"types": "./dist/deprecated.d.mts",
+			"import": "./dist/deprecated.mjs"
+		},
+		"./config": {
+			"types": "./dist/deprecated.d.mts",
+			"import": "./dist/deprecated.mjs"
+		}
+	},
+	"main": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"files": [
+		"dist"
+	],
+	"engines": {
+		"node": ">=22.18.0"
+	},
+	"scripts": {
+		"build": "tsdown",
+		"check:types": "tsc --noEmit",
+		"test": "vitest run",
+		"prepublishOnly": "cp ../../README.md ."
+	},
+	"devDependencies": {
+		"tsdown": "^0.22.0",
+		"typescript": "^6.0.3",
+		"vitest": "^4.1.6"
+	}
+}
