@@ -9,10 +9,14 @@
 > |     | Deep-dive documentation |
 > | --- | --- |
 > | 📖 | **[Flue, Demystified](docs/FLUE-DEMYSTIFIED.md)** — the full write-up: the three meanings of "harness", `agent = model + harness`, agents vs. workflows, and a turn-by-turn trace of `prompt()` |
-> | 🖥️ | **[Interactive explainer](docs/flue-demystified.html)** — open the file locally, or [**view it live**](https://htmlpreview.github.io/?https://github.com/az9713/flue-tutorial/blob/main/docs/flue-demystified.html) |
+> | 🖥️ | **[Interactive explainer](docs/flue-demystified.html)** — open the file locally, or [**view it live**](https://az9713.github.io/flue-tutorial/flue-demystified.html) |
 > | 🎬 | **[Watch the 34-second video](https://github.com/user-attachments/assets/23c30ab8-2524-4993-a45c-e09c2a51a834)** — or [view it in-repo](docs/flue-demystified.mp4) |
 >
 > _All upstream Flue source and documentation below are preserved unmodified. Flue is © its authors under the terms in [`LICENSE`](LICENSE)._
+
+**🎬 Watch the explainer** (the same content as the interactive page, rendered to video):
+
+https://github.com/user-attachments/assets/23c30ab8-2524-4993-a45c-e09c2a51a834
 
 ---
 
